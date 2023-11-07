@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
+import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Hooks:
+import { AuthContextProvider, useAuth } from '@/hooks/useAuth';
 
+// Components: 
+import { Home, Navigation, Issuer, Verifier } from '@/components';
+
+function Layout() { // TODO: create a sidebar
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+        <AuthContextProvider>
+            <Navigation/>
+              <h1 className="text-3xl font-bold underline">
+                Hello world!
+              </h1>           
+              <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
+        </AuthContextProvider>
     </>
-  )
+  );
 }
 
-export default App
+const ProtectedRoute = (props: {redirectPath: string,  children?: any}) => {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) {
+    return <Navigate to={props.redirectPath} replace />;
+  }
+
+  return props.children ? props.children : <Outlet />;
+};
+
+function App() {
+  const router = createBrowserRouter([  // 🆕
+    { element: <Layout/>,  /* 1️⃣ Wrap your routes in a pathless layout route */
+      children: [
+        { path: "/", Component: Home }, 
+        { path: "/issuer", Component: Issuer },
+        { path: "/verifier", Component: Verifier },
+        // { element: <ProtectedRoute redirectPath="/" />,
+        //   children: [
+        //     { path: "/some-protected-route", element: <SomeProtectedComponent> },
+        //   ]
+        // },
+      ]
+    },
+    { path:"*", Component: () => <h1>404</h1> }
+  ]);
+
+  return <RouterProvider router={router} />;
+} 
+
+export default App;
