@@ -1,7 +1,8 @@
 import { Navigation } from './Navigation';
 import { Home } from './Home';
-import { Subject } from './Subject';
-import { Reviewer } from './Reviewer';
+import { Profile } from './Profile';
+import { Reviews, Review } from './Reviews';
 import { Landing } from './Landing'
+import { Error } from './Error'
 
-export { Landing, Home, Navigation, Subject, Reviewer };
+export { Landing, Home, Navigation, Profile, Review, Reviews, Error };

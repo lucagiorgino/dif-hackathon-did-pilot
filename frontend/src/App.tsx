@@ -1,38 +1,48 @@
-import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 // Hooks:
 import { AuthContextProvider, useAuth } from '@/hooks/useAuth';
 
 // Components: 
-import { Home, Navigation, Landing, Reviewer, Subject } from '@/components';
+import { Home, Navigation, Landing, Reviews, Profile, Error } from '@/components';
 
 import { fn } from '@/api/web5API';
+import { ErrContextProvider } from './hooks/useError';
+import { Col, Container, Row } from 'react-bootstrap';
 
 
 function Layout() { // TODO: create a sidebar
   return (
     <>
-        <AuthContextProvider>
-            <Navigation/>
-              <h1 className="text-3xl font-bold underline">
-                Hello world!
-                <button onClick={fn}></button>
-              </h1>           
-              <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
-        </AuthContextProvider>
+      <ErrContextProvider>
+      <AuthContextProvider>
+        <Navigation/> 
+        <Container className="mt-2" fluid>
+            <Row className="justify-content-md-center">
+              <Col sm={4} md={6}>
+                  <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
+              </Col>
+            </Row>
+          <Row className="fixed-bottom">
+            <Col className="mx-4 mb-2"><Error/></Col>
+          </Row>
+        </Container>  
+      </AuthContextProvider>
+      </ErrContextProvider>
     </>
   );
 }
 
-const ProtectedRoute = (props: {redirectPath: string,  children?: any}) => {
-  const { isAuthenticated } = useAuth();
-  if (!isAuthenticated) {
-    return <Navigate to={props.redirectPath} replace />;
-  }
+// const ProtectedRoute = (props: {redirectPath: string,  children?: any}) => {
+//   const { isAuthenticated } = useAuth();
+//   if (!isAuthenticated) {
+//     return <Navigate to={props.redirectPath} replace />;
+//   }
 
-  return props.children ? props.children : <Outlet />;
-};
+//   return props.children ? props.children : <Outlet />;
+// };
 
 function App() {
   const router = createBrowserRouter([  // 🆕
@@ -40,8 +50,8 @@ function App() {
       children: [
         { path: "/", Component: Landing }, 
         { path: "/home", Component: Home }, 
-        { path: "/reviewer", Component: Reviewer },
-        { path: "/subject", Component: Subject },
+        { path: "/reviews", Component: Reviews },
+        { path: "/profile", Component: Profile },
         // { element: <ProtectedRoute redirectPath="/" />,
         //   children: [
         //     { path: "/some-protected-route", element: <SomeProtectedComponent> },
