@@ -1,14 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 // Hooks:
-import { AuthContextProvider, useAuth } from '@/hooks/useAuth';
+import { AuthContextProvider } from '@/hooks/useAuth';
 
 // Components: 
 import { Home, Navigation, Landing, Reviews, Profile, Error } from '@/components';
 
-import { fn } from '@/api/web5API';
+// import { fn } from '@/api/web5API';
 import { ErrContextProvider } from './hooks/useError';
 import { Col, Container, Row } from 'react-bootstrap';
 
