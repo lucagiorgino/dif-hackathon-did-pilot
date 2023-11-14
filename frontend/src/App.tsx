@@ -4,7 +4,8 @@ import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
 import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 
 // Hooks:
-import { AuthContextProvider } from '@/hooks/useAuth';
+// import { AuthContextProvider } from '@/hooks/useAuth';
+import { Web5ContextProvider } from '@/hooks/useWeb5';
 
 // Components: 
 import { Home, Navigation, Landing, Reviews, Profile, Error } from '@/components';
@@ -18,7 +19,8 @@ function Layout() { // TODO: create a sidebar
   return (
     <>
       <ErrContextProvider>
-      <AuthContextProvider>
+      <Web5ContextProvider>
+      {/* <AuthContextProvider> */}
         <Navigation/> 
         <Container className="mt-2" fluid>
             <Row className="justify-content-md-center">
@@ -30,7 +32,8 @@ function Layout() { // TODO: create a sidebar
             <Col className="mx-4 mb-2"><Error/></Col>
           </Row>
         </Container>  
-      </AuthContextProvider>
+      {/* </AuthContextProvider> */}
+      </Web5ContextProvider>
       </ErrContextProvider>
     </>
   );

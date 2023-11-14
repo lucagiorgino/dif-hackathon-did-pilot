@@ -7,12 +7,14 @@ import Modal from "react-bootstrap/esm/Modal";
 import { useState } from "react";
 import Form from "react-bootstrap/esm/Form";
 import RangeSlider from 'react-bootstrap-range-slider';
+import { useWeb5 } from "@/hooks/useWeb5";
 
 export function Reviews () {
     // const columnsPerRow = 2;
     const [modalShow, setModalShow] = useState(false);
     const [stars, setStars] = useState(3);
-
+    const {web5, userDid} = useWeb5();
+     
     return <> 
     <Container className="position-relative" fluid>
         <OverlayTrigger placement="bottom" overlay={<Tooltip>These are the reviews done by me.</Tooltip>}>
@@ -46,14 +48,17 @@ export function Reviews () {
                     <Form.Label><strong>Stars</strong></Form.Label>
                     <RangeSlider
                         value={stars}
-                        min={0} max={5}
+                        min={1} max={5}
                         onChange={(event)=>setStars(event.target.valueAsNumber)}
                         tooltipPlacement='bottom'
                         tooltip='on'
                         variant='warning'
                     />
                 </Form.Group>
-
+                <Form.Group className="mb-3" controlId="formDescription">
+                    <Form.Label><strong>Description</strong></Form.Label>
+                    <Form.Control as="textarea" rows={3} />
+                </Form.Group>
             </Modal.Body>
             <Modal.Footer className="justify-content-center">
                 <Button variant="dark">Publish review</Button>
