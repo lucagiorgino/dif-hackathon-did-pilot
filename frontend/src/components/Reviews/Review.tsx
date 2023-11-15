@@ -18,8 +18,7 @@ export function Review(props: {didSubject: string, stars: number, description: s
         <Card.Title>{props.didSubject} </Card.Title>
         <Card.Subtitle className="mb-2 text-muted">{stars(props.stars)}</Card.Subtitle>
         <Card.Text>
-          Some quick example text to build on the card title and make up the
-          bulk of the card's content.
+          {props.description}
         </Card.Text>
       </Card.Body>
     </Card>

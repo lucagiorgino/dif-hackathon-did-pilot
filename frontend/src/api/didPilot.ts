@@ -7,11 +7,11 @@ import {
     Web5 
 } from '@web5/api';
 
-const writeDWN = async (web5: Web5, data: string) => {
+const writeDWN = async (web5: Web5, data: object) => {
     const { record } = await web5.dwn.records.create({
         data,
         message: {
-          dataFormat: 'text/plain',
+          dataFormat: 'application/json',
         },
     });
     return record;
@@ -46,7 +46,13 @@ const queryRecordsDWN = async (web5: Web5, query: RecordsQueryRequest) => {
     const { records } = await web5.dwn.records.query({
         ...query
     });
-    return records;
+    const parsedRecords = [];
+    if (records) {
+        for (const record of records) {
+            parsedRecords.push(await record.data.json());
+        }
+    }
+    return { records, parsedRecords };
 }
 
 const queryProtocolsDWN = async (web5: Web5, query: ProtocolsQueryRequest) => {

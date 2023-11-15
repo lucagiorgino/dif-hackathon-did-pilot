@@ -4,16 +4,65 @@ import { Review } from ".";
 import Tooltip from "react-bootstrap/esm/Tooltip";
 import OverlayTrigger from "react-bootstrap/esm/OverlayTrigger";
 import Modal from "react-bootstrap/esm/Modal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Form from "react-bootstrap/esm/Form";
 import RangeSlider from 'react-bootstrap-range-slider';
 import { useWeb5 } from "@/hooks/useWeb5";
+import API from "@/api/didPilot";
+import { DidReview } from "@/types/types";
 
 export function Reviews () {
     // const columnsPerRow = 2;
     const [modalShow, setModalShow] = useState(false);
     const [stars, setStars] = useState(3);
+    const [subjectDid, setSubjectDid] = useState("");
+    const [description, setDescription] = useState("");
     const {web5, userDid} = useWeb5();
+
+    // get reviews from the DWN
+    const [reviews, setReviews] = useState<DidReview[]>([]);
+
+    const handlePublish = async () => {
+        if (web5 && userDid) {
+            const record = await API.writeDWN(
+                web5, 
+                {
+                    subjectDid: subjectDid,
+                    stars: stars,
+                    description: description
+                }
+            )
+
+            // send data to the DWN instantly
+            await API.sendRecordDWN(record!, userDid)
+
+            console.log("record data: ", await record?.data.json())
+            console.log("record author: ", record?.author)
+        }
+    }
+
+    const getReviewsFromDWN = async () => {
+        if (web5 && userDid) {
+            const { parsedRecords } = await API.queryRecordsDWN(
+                web5,
+                {
+                    from: userDid,
+                    message: {
+                        filter: {
+                            dataFormat: "application/json",
+                        }
+                    }
+                }
+            )
+            console.log("reviews: ", parsedRecords)
+            if (parsedRecords)
+                setReviews(parsedRecords)
+        } 
+    }
+
+    useEffect(() => {
+        getReviewsFromDWN();
+    }, [web5, userDid])
      
     return <> 
     <Container className="position-relative" fluid>
@@ -28,7 +77,21 @@ export function Reviews () {
                 ))
             }
         </Row> */}
-        <Review didSubject={"did:xyz:example"} stars={4} description={"Hello"}/>
+        <Container className="d-flex flex-wrap justify-content-center">
+            {
+                reviews ?
+                    reviews.map((review, index) => (
+                        <Review 
+                            key={index} 
+                            didSubject={review.subjectDid}
+                            stars={review.stars}
+                            description={review.description}
+                        />
+                    ))
+                :
+                    <>There are no reviews at the moment</>
+            }
+        </Container>
     </Container>
     
     <Modal show={modalShow} onHide={() => {setModalShow(false);}}>
@@ -39,7 +102,7 @@ export function Reviews () {
             <Modal.Body>
                 <Form.Group className="mb-3" controlId="formDid">
                     <Form.Label><strong>DID subject</strong></Form.Label>
-                    <Form.Control type="text" placeholder="Insert a DID" />
+                    <Form.Control type="text" placeholder="Insert a DID" onChange={(e) => setSubjectDid(e.target.value)} />
                     <Form.Text className="text-muted">
                         Did of the subject of the review.
                     </Form.Text>
@@ -57,11 +120,21 @@ export function Reviews () {
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formDescription">
                     <Form.Label><strong>Description</strong></Form.Label>
-                    <Form.Control as="textarea" rows={3} />
+                    <Form.Control as="textarea" rows={3} onChange={(e) => setDescription(e.target.value)} />
                 </Form.Group>
             </Modal.Body>
             <Modal.Footer className="justify-content-center">
-                <Button variant="dark">Publish review</Button>
+                <Button variant="dark" onClick={
+                    () => {
+                        handlePublish()
+                            .then(() => {
+                                setModalShow(false);
+                                getReviewsFromDWN();
+                            })
+                    }
+                }>
+                    Publish review
+                </Button>
             </Modal.Footer>
         </Form>
     </Modal>
