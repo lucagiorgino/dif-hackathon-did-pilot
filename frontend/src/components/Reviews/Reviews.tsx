@@ -20,7 +20,7 @@ export function Reviews () {
     const {web5, userDid} = useWeb5();
 
     // get reviews from the DWN
-    const [reviews, setReviews] = useState<DidReview[]>([]);
+    const [reviews, setReviews] = useState<DidReview[] | undefined>(undefined);
 
     const handlePublish = async () => {
         if (web5 && userDid) {
@@ -43,7 +43,7 @@ export function Reviews () {
 
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
-            const { parsedRecords } = await API.queryRecordsDWN(
+            const { parsedRecords, records } = await API.queryRecordsDWN(
                 web5,
                 {
                     from: userDid,
@@ -55,6 +55,7 @@ export function Reviews () {
                 }
             )
             console.log("reviews: ", parsedRecords)
+            console.log("records: ", records)
             if (parsedRecords)
                 setReviews(parsedRecords)
         } 
@@ -67,7 +68,7 @@ export function Reviews () {
     return <> 
     <Container className="position-relative" fluid>
         <OverlayTrigger placement="bottom" overlay={<Tooltip>These are the reviews done by me.</Tooltip>}>
-            <h1 className="text-center">Reviews</h1>
+            <h1 className="text-center">Your Reviews</h1>
         </OverlayTrigger>
         <Button className="my-2 position-absolute top-0 end-0" variant="outline-dark" onClick={() => {setModalShow(true); setStars(3);}}><i className="bi bi-plus-circle-fill"/></Button>
         {/* <Row md={columnsPerRow}> 
@@ -79,7 +80,7 @@ export function Reviews () {
         </Row> */}
         <Container className="d-flex flex-wrap justify-content-center">
             {
-                reviews ?
+                reviews && reviews.length > 0 ?
                     reviews.map((review, index) => (
                         <Review 
                             key={index} 
@@ -89,7 +90,10 @@ export function Reviews () {
                         />
                     ))
                 :
-                    <>There are no reviews at the moment</>
+                    reviews == undefined ?
+                        <>Loading reviews...</>
+                    :
+                        <>You didn't write a review yet. Please consider to contribute to the network and write your first review</>
             }
         </Container>
     </Container>

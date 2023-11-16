@@ -12,6 +12,7 @@ const writeDWN = async (web5: Web5, data: object) => {
         data,
         message: {
           dataFormat: 'application/json',
+          recipient: (data as any).subjectDid,
         },
     });
     return record;
