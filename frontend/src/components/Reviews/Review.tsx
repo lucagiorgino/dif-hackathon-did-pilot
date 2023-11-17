@@ -1,6 +1,10 @@
+import { useState } from "react";
+import { Badge, Button, Collapse } from "react-bootstrap";
 import Card from "react-bootstrap/esm/Card";
 
 export function Review(props: {didSubject: string, stars: number, description: string}) {
+
+    const [open, setOpen] = useState(false);
 
     const stars = (n: number) => {
         const stars = [];
@@ -13,13 +17,16 @@ export function Review(props: {didSubject: string, stars: number, description: s
     };
 
     return <>
-    <Card style={{ width: '18rem' }}>
+    <Card className="" >
       <Card.Body>
-        <Card.Title>{props.didSubject} </Card.Title>
+        <Card.Title className="text-truncate">{props.didSubject} </Card.Title>
         <Card.Subtitle className="mb-2 text-muted">{stars(props.stars)}</Card.Subtitle>
-        <Card.Text>
-          {props.description}
-        </Card.Text>
+        <Badge bg="dark" className="text-uppercase" onClick={() => setOpen(!open)} >{!open ? "Read description" : "Hide description"}</Badge>
+        <Collapse in={open}>
+          <Card.Text className="mt-2">
+              {props.description}
+          </Card.Text>
+        </Collapse>
       </Card.Body>
     </Card>
     </>

@@ -1,18 +1,12 @@
-import Button from "react-bootstrap/Button";
-import Container from "react-bootstrap/esm/Container";
 import { Review } from ".";
-import Tooltip from "react-bootstrap/esm/Tooltip";
-import OverlayTrigger from "react-bootstrap/esm/OverlayTrigger";
-import Modal from "react-bootstrap/esm/Modal";
 import { useEffect, useState } from "react";
-import Form from "react-bootstrap/esm/Form";
 import RangeSlider from 'react-bootstrap-range-slider';
 import { useWeb5 } from "@/hooks/useWeb5";
 import API from "@/api/didPilot";
 import { DidReview } from "@/types/types";
+import { Row, Button, Container, Tooltip, OverlayTrigger, Modal, Form, Col, Spinner, CardGroup } from "react-bootstrap";
 
 export function Reviews () {
-    // const columnsPerRow = 2;
     const [modalShow, setModalShow] = useState(false);
     const [stars, setStars] = useState(3);
     const [subjectDid, setSubjectDid] = useState("");
@@ -41,27 +35,28 @@ export function Reviews () {
         }
     }
 
-    const getReviewsFromDWN = async () => {
-        if (web5 && userDid) {
-            const { parsedRecords, records } = await API.queryRecordsDWN(
-                web5,
-                {
-                    from: userDid,
-                    message: {
-                        filter: {
-                            dataFormat: "application/json",
+    useEffect(() => {
+        
+        const getReviewsFromDWN = async () => {
+            if (web5 && userDid) {
+                const { parsedRecords, records } = await API.queryRecordsDWN(
+                    web5,
+                    {
+                        from: userDid,
+                        message: {
+                            filter: {
+                                dataFormat: "application/json",
+                            }
                         }
                     }
-                }
-            )
-            console.log("reviews: ", parsedRecords)
-            console.log("records: ", records)
-            if (parsedRecords)
-                setReviews(parsedRecords)
-        } 
-    }
+                )
+                console.log("reviews: ", parsedRecords)
+                console.log("records: ", records)
+                if (parsedRecords)
+                    setReviews(parsedRecords)
+            } 
+        }
 
-    useEffect(() => {
         getReviewsFromDWN();
     }, [web5, userDid])
      
@@ -71,31 +66,33 @@ export function Reviews () {
             <h1 className="text-center">Your Reviews</h1>
         </OverlayTrigger>
         <Button className="my-2 position-absolute top-0 end-0" variant="outline-dark" onClick={() => {setModalShow(true); setStars(3);}}><i className="bi bi-plus-circle-fill"/></Button>
-        {/* <Row md={columnsPerRow}> 
-            {
-                reviews.map((review, index) => (
-                    <Col key={index}><Review key={index} review={review} /></Col>  
-                ))
-            }
-        </Row> */}
-        <Container className="d-flex flex-wrap justify-content-center">
+            <Container className="my-2">
             {
                 reviews && reviews.length > 0 ?
-                    reviews.map((review, index) => (
-                        <Review 
-                            key={index} 
-                            didSubject={review.subjectDid}
-                            stars={review.stars}
-                            description={review.description}
-                        />
-                    ))
+                    <Row lg={1} xl={2}  className="g-2">
+                        {reviews.map((review, index) => (
+                            <Col key={index}>
+                                <Review 
+                                    key={index} 
+                                    didSubject={review.subjectDid}
+                                    stars={review.stars}
+                                    description={review.description}
+                                />
+                            </Col>
+                        ))}
+                    </Row>
+
                 :
-                    reviews == undefined ?
-                        <>Loading reviews...</>
+                <Row className="justify-content-center mt-4">
+                    {reviews == undefined ?
+                        <Spinner animation="border" variant="warning"/>
                     :
-                        <>You didn't write a review yet. Please consider to contribute to the network and write your first review</>
-            }
-        </Container>
+                        <span className="text-center">You didn't write a review yet. <br/>Please consider to contribute to the network and write your first review.</span>
+                    }
+                </Row>
+                    
+                }
+            </Container>
     </Container>
     
     <Modal show={modalShow} onHide={() => {setModalShow(false);}}>
