@@ -2,18 +2,24 @@ import { Link } from "react-router-dom";
 
 export function Landing () {
     return <>
-    <h1 className="mt-5">
-    Welcome to <i className="bi bi-bookmark-star-fill me-2"/><strong>DIDPilot!</strong><br/>
+    <h1 className="mt-5 display-3">
+    Welcome to <strong>DID Pilot!</strong><br/>
     </h1>
-    <h3 className="text-body-secondary">
-    When you need to know if a site is safe what do you do on internet?<br/>
-    Well, you simply search for reviews on <span className="text-success">TrustPilot</span> right?<br/>
-    So why don't do the same thing with DIDs?<br/><br/>
-    </h3>
-    <h4>    <Link target="_blank" to={`https://github.com/lucagiorgino/dif-hackathon-frontend`}  style={{ textDecoration: 'none' }}><i className="bi bi-github me-2"/>GitHub repository</Link> </h4>
+    <p className="lead text-justify">
+    When you need to know if a service is safe what do you do on internet? Well, you simply search for reviews on <mark className="bg-success bg-opacity-10 text-success"><strong>TrustPilot</strong></mark>, right? 
+    So, why why not apply the same approach to <mark className="bg-primary bg-opacity-10 text-primary"><strong>Decentralized Identifiers</strong></mark>?
+    </p>
 
-    
-    
+    <p><strong>DIF work items</strong> used in the project: Decentralized Web Nodes, Trust Establishment.<br/>
+    <strong>Authors</strong>: 
+        <Link className="text-body-secondary text-decoration-none" target="_blank" to={`https://github.com/lucagiorgino`}> Luca Giorgino</Link>,
+        <Link className="text-body-secondary text-decoration-none" target="_blank" to={`https://github.com/mmatteo23`}> Matteo Midena</Link>
+    </p>
+    <h4>    
+        <Link className="text-decoration-none" target="_blank" to={`https://github.com/lucagiorgino/dif-hackathon-frontend`}>
+            <i className="bi bi-github me-2"/>GitHub repository
+        </Link> 
+    </h4>
     
     </>;
 }

@@ -10,7 +10,7 @@ export function Review(props: {didSubject: string, stars: number, description: s
         const stars = [];
 
         for (let i = 0; i < n; i++) {
-            stars.push(<i className="bi bi-star-fill ms-2 text-warning"/>);
+            stars.push(<i key={i} className="bi bi-star-fill ms-2 text-warning"/>);
         }
 
         return stars;

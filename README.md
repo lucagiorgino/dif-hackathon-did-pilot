@@ -1,4 +1,9 @@
 # dif-hackathon-frontend
+This project has been developed for the [Decentralized Identity Foundation Hackathon]
+
+## introduction
+
+
 
 ## dev
 
