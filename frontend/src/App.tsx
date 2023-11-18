@@ -63,7 +63,7 @@ function App() {
         // },
       ]
     },
-    { path:"*", Component: () => <h1>404</h1> }
+    { path:"*", Component: () => <h1 className='position-absolute top-50 start-50 translate-middle'>404 Page not Found</h1> }
   ]);
 
   return <RouterProvider router={router} />;

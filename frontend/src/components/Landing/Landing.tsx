@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export function Landing () {
     return <>
-    <div className="shadow p-3 bg-body rounded position-absolute top-50 start-50 translate-middle">
+    <div className="shadow p-5 bg-body rounded position-absolute top-50 start-50 translate-middle">
         <h1 className="display-3">
         Welcome to <strong>DID Pilot!</strong><br/>
         </h1>

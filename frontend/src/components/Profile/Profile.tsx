@@ -1,19 +1,20 @@
 import { useWeb5 } from "@/hooks/useWeb5";
 import { useEffect, useState } from "react";
 import { Tooltip, OverlayTrigger, Row, Spinner} from "react-bootstrap";
-import { Review, Reviews } from "..";
+import { Reviews } from "..";
 import { DidReview } from "@/types/types";
 import didPilotReviewAPI, { DidStats } from "@/api/didPilotReview";
 
 export function Profile () {
-    const {web5, userDid} = useWeb5();
+    const {web5, userDid, web5Loading} = useWeb5();
     const [reviews, setReviews] = useState<DidReview[]>([]);
     const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO: use stats
+    const [_stats, setStats] = useState<DidStats | undefined>(undefined); // TODO: use stats
 
 
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
+            setLoading(true);
             const { reviews } = await didPilotReviewAPI.getReviewsByRecipient(web5, userDid);
             const stats = await didPilotReviewAPI.getDidStats(web5, userDid);
             
@@ -30,15 +31,15 @@ export function Profile () {
     }, [web5, userDid])
 
     return <>
-        <p  className="text-center">
+        <div  className="text-center">
             <OverlayTrigger placement="bottom" overlay={<Tooltip>These are the reviews that I received.</Tooltip>}>
                 <h1>Profile</h1>
             </OverlayTrigger>
-        </p>
+        </div>
 
         <p className="text-center">It's time to know what others think about you. Reviews about you: </p>
 
-        {!loading ?
+        {!loading && !web5Loading ?
         <Reviews reviews={reviews} />
         : 
         <Row className="justify-content-center mt-4">

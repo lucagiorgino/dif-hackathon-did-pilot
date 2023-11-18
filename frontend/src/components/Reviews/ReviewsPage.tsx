@@ -12,8 +12,10 @@ export function ReviewsPage () {
     const [stars, setStars] = useState(3);
     const [subjectDid, setSubjectDid] = useState("");
     const [description, setDescription] = useState("");
-    const {web5, userDid} = useWeb5();
+    const {web5, userDid, web5Loading} = useWeb5();
     const [loading, setLoading] = useState(false);
+    const [publishingLoading, setPublishingLoading] = useState(false);
+
 
     // get reviews from the DWN
     const [reviews, setReviews] = useState<DidReview[]>([]);
@@ -30,9 +32,10 @@ export function ReviewsPage () {
         } 
     }
 
-    const handlePublish = async () => {
+    const handlePublish = async (event: React.FormEvent) => {
+        event.preventDefault();
         if (web5 && userDid) {
-            setLoading(true);
+            setPublishingLoading(true);
 
             const review = {
                 subjectDid: subjectDid,
@@ -44,7 +47,7 @@ export function ReviewsPage () {
             // send data to the DWN instantly
             if (record) await dwnConnectorAPI.sendRecord(record, userDid);
 
-            setLoading(false);
+            setPublishingLoading(false);
             setModalShow(false);
             getReviewsFromDWN();
         }
@@ -56,16 +59,16 @@ export function ReviewsPage () {
      
     return <> 
     <Container className="position-relative" fluid>
-        <p  className="text-center">
+        <div  className="text-center">
             <OverlayTrigger placement="bottom" overlay={<Tooltip>These are the reviews done by me.</Tooltip>}>
                 <h1>Your Reviews</h1>
             </OverlayTrigger>
-        </p>
+        </div>
         <Button className="my-2 position-absolute top-0 end-0" variant="outline-dark" onClick={() => {setModalShow(true); setStars(3);}}><i className="bi bi-plus-circle-fill"/></Button>
 
         <p className="text-center">Contribute to the network and write a review. Reviews that you wrote: </p>
 
-        {!loading ?
+        {!loading && !web5Loading ?
         <Reviews reviews={reviews}/>
         : 
         <Row className="justify-content-center mt-4">
@@ -75,14 +78,14 @@ export function ReviewsPage () {
     </Container>
     
     <Modal show={modalShow} onHide={() => {setModalShow(false);}}>
-        <Form>
+        <Form onSubmit={handlePublish}>
             <Modal.Header closeButton>
                 <Modal.Title>Add a review</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form.Group className="mb-3" controlId="formDid">
                     <Form.Label><strong>DID subject</strong></Form.Label>
-                    <Form.Control type="text" placeholder="Insert a DID" onChange={(e) => setSubjectDid(e.target.value)} />
+                    <Form.Control type="text" placeholder="Insert a DID" onChange={(e) => setSubjectDid(e.target.value)} required/>
                     <Form.Text className="text-muted">
                         Did of the subject of the review.
                     </Form.Text>
@@ -100,11 +103,13 @@ export function ReviewsPage () {
                 </Form.Group>
                 <Form.Group className="mb-3" controlId="formDescription">
                     <Form.Label><strong>Description</strong></Form.Label>
-                    <Form.Control as="textarea" rows={3} onChange={(e) => setDescription(e.target.value)} />
+                    <Form.Control as="textarea" rows={3} onChange={(e) => setDescription(e.target.value)} required/>
                 </Form.Group>
             </Modal.Body>
             <Modal.Footer className="justify-content-center">
-                <Button variant="dark" onClick={handlePublish}>Publish review</Button>
+                <Button variant="dark" type="submit">
+                { publishingLoading ? <Spinner animation="border" variant="warning" size="sm"/> :"Publish review" }
+                </Button>
             </Modal.Footer>
         </Form>
     </Modal>

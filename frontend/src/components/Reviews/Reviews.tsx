@@ -1,5 +1,5 @@
 import { DidReview } from "@/types/types";
-import { Col, Container, Row, Spinner } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import { Review } from "./Review";
 
 export function Reviews (props: {reviews: DidReview[]}) {

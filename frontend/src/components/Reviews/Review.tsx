@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Button, Collapse, OverlayTrigger, Row, Stack, Tooltip } from "react-bootstrap";
+import { Badge, Button, Collapse, OverlayTrigger, Stack, Tooltip } from "react-bootstrap";
 import Card from "react-bootstrap/esm/Card";
 
 export function Review(props: {didSubject: string, stars: number, description: string}) {

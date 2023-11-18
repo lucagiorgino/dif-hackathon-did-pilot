@@ -1,4 +1,3 @@
-import { useWeb5 } from "@/hooks/useWeb5";
 import SearchBar from "./SearchBar";
 
 export function Home () {

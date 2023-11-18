@@ -1,7 +1,7 @@
 import { useWeb5 } from "@/hooks/useWeb5";
 import { removeCenterCharacter } from "@/utils";
-import { useRef, useState } from "react";
-import { Badge, Button, Container, Nav, Navbar, Overlay, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
+import { useState } from "react";
+import { Badge, Container, Nav, Navbar, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 export function Navigation () {
