@@ -16,12 +16,12 @@ type ReviewsResponse = {
     reviews: DidReview[]
 }
 
-type DidStats = {
+export type DidStats = {
     totalReviews: number,
     averageStars: number
     reviewedSince: string,
     totalReviewers: number
-  }
+}
 
 
 const createReview = async (web5: Web5, review: DidReview) => {
@@ -153,5 +153,5 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
     }
 }
 
-const didPilotReview = { createReview, getReviewsByAuthor, getReviewById, updateReviewById, deleteReviewById, getReviewsByRecipient, getDidStats };
-export default didPilotReview;
+const didPilotReviewAPI = { createReview, getReviewsByAuthor, getReviewById, updateReviewById, deleteReviewById, getReviewsByRecipient, getDidStats };
+export default didPilotReviewAPI;

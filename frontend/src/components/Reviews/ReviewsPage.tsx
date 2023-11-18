@@ -2,9 +2,10 @@ import { Reviews } from ".";
 import { useEffect, useState } from "react";
 import RangeSlider from 'react-bootstrap-range-slider';
 import { useWeb5 } from "@/hooks/useWeb5";
-import API from "@/api/didPilot";
 import { DidReview } from "@/types/types";
 import { Button, Container, Tooltip, OverlayTrigger, Modal, Form, Row, Spinner } from "react-bootstrap";
+import didPilotReviewAPI from "@/api/didPilotReview";
+import dwnConnectorAPI from "@/api/dwnConnector";
 
 export function ReviewsPage () {
     const [modalShow, setModalShow] = useState(false);
@@ -20,21 +21,11 @@ export function ReviewsPage () {
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
             setLoading(true);
-            const { parsedRecords, records } = await API.queryRecordsDWN(
-                web5,
-                {
-                    from: userDid,
-                    message: {
-                        filter: {
-                            dataFormat: "application/json",
-                        }
-                    }
-                }
-            );
-            console.log("reviews: ", parsedRecords);
-            console.log("records: ", records);
-            if (parsedRecords)
-                setReviews(parsedRecords);
+            const { reviews } = await didPilotReviewAPI.getReviewsByAuthor(web5, userDid);
+            
+            console.log("Results: ", reviews);
+            
+            setReviews(reviews);
             setLoading(false);
         } 
     }
@@ -42,21 +33,20 @@ export function ReviewsPage () {
     const handlePublish = async () => {
         if (web5 && userDid) {
             setLoading(true);
-            const record = await API.writeDWN(
-                web5, 
-                {
-                    subjectDid: subjectDid,
-                    stars: stars,
-                    description: description
-                }
-            )
 
+            const review = {
+                subjectDid: subjectDid,
+                stars: stars,
+                description: description
+            };
+            const record = await didPilotReviewAPI.createReview(web5, review);
+    
             // send data to the DWN instantly
-            await API.sendRecordDWN(record!, userDid)
+            if (record) await dwnConnectorAPI.sendRecord(record, userDid);
 
-            console.log("record data: ", await record?.data.json())
-            console.log("record author: ", record?.author)
             setLoading(false);
+            setModalShow(false);
+            getReviewsFromDWN();
         }
     }
 
@@ -114,17 +104,7 @@ export function ReviewsPage () {
                 </Form.Group>
             </Modal.Body>
             <Modal.Footer className="justify-content-center">
-                <Button variant="dark" onClick={
-                    () => {
-                        handlePublish()
-                            .then(() => {
-                                setModalShow(false);
-                                getReviewsFromDWN();
-                            })
-                    }
-                }>
-                    Publish review
-                </Button>
+                <Button variant="dark" onClick={handlePublish}>Publish review</Button>
             </Modal.Footer>
         </Form>
     </Modal>

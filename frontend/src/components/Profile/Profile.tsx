@@ -1,33 +1,26 @@
-import API from "@/api/didPilot";
 import { useWeb5 } from "@/hooks/useWeb5";
 import { useEffect, useState } from "react";
 import { Tooltip, OverlayTrigger, Row, Spinner} from "react-bootstrap";
 import { Review, Reviews } from "..";
 import { DidReview } from "@/types/types";
+import didPilotReviewAPI, { DidStats } from "@/api/didPilotReview";
 
 export function Profile () {
     const {web5, userDid} = useWeb5();
     const [reviews, setReviews] = useState<DidReview[]>([]);
     const [loading, setLoading] = useState(false);
+    const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO: use stats
+
 
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
-            setLoading(true);
-            const { parsedRecords, records } = await API.queryRecordsDWN(
-                web5,
-                {
-                    message: {
-                        filter: {
-                            dataFormat: "application/json",
-                            recipient: userDid
-                        }
-                    }
-                }
-            );
-            console.log("reviews: ", parsedRecords);
-            console.log("records: ", records);
-            if (parsedRecords)
-                setReviews(parsedRecords);
+            const { reviews } = await didPilotReviewAPI.getReviewsByRecipient(web5, userDid);
+            const stats = await didPilotReviewAPI.getDidStats(web5, userDid);
+            
+            console.log("Results: ", reviews);
+            
+            setStats(stats);
+            setReviews(reviews);
             setLoading(false);
         } 
     }

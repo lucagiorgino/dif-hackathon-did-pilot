@@ -1,4 +1,3 @@
-import API from '@/api/didPilot';
 import { useWeb5 } from '@/hooks/useWeb5';
 import { DidReview } from '@/types/types';
 import { useState } from 'react';
@@ -7,32 +6,29 @@ import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
 import { Review, Reviews } from '..';
 import { Row, Spinner } from 'react-bootstrap';
+import didPilotReviewAPI, {DidStats} from '@/api/didPilotReview';
 
 function SearchBar() {
-  const {web5, userDid} = useWeb5();
+  const {web5} = useWeb5();
   const [queryDid, setQueryDid] = useState<string>("");
   const [reviews, setReviews] = useState<DidReview[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO use stats
 
   const handleSearch = async () => {
-    console.log("searching for: ", queryDid)
+    console.log("Searching for: ", queryDid)
     if (web5) {
       setSearched(true);
       setLoading(true);
-      const { parsedRecords } = await API.queryRecordsDWN(
-        web5,
-        {
-          message: {
-            filter: {
-              recipient: queryDid,
-            }
-          }
-        }
-      );
-      console.log("search results: ", parsedRecords);
-      if (parsedRecords)
-        setReviews(parsedRecords);
+
+      const { reviews } = await didPilotReviewAPI.getReviewsByRecipient(web5, queryDid);
+      const stats = await didPilotReviewAPI.getDidStats(web5, queryDid);
+      
+      console.log("Results: ", reviews);
+      
+      setStats(stats);
+      setReviews(reviews);
       setLoading(false);
     } 
   }
