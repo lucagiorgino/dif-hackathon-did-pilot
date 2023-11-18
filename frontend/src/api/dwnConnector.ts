@@ -81,5 +81,5 @@ const sendProtocol = async (protocol: Protocol, recipient: string) => {
   return status;
 }
 
-const dwnConnector = { writeRecord, readRecord, updateRecord, deleteRecord, queryRecords, queryProtocols, createProcotol, sendRecord, sendProtocol };
-export default dwnConnector;
+const dwnConnectorAPI = { writeRecord, readRecord, updateRecord, deleteRecord, queryRecords, queryProtocols, createProcotol, sendRecord, sendProtocol };
+export default dwnConnectorAPI;
