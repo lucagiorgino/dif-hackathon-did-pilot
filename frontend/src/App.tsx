@@ -8,14 +8,14 @@ import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Web5ContextProvider } from '@/hooks/useWeb5';
 
 // Components: 
-import { Home, Navigation, Landing, Reviews, Profile, Error } from '@/components';
+import { Home, Navigation, Landing, ReviewsPage, Profile, Error } from '@/components';
 
 // import { fn } from '@/api/web5API';
 import { ErrContextProvider } from './hooks/useError';
 import { Col, Container, Row } from 'react-bootstrap';
 
 
-function Layout() { // TODO: create a sidebar
+function Layout() {
   return (
     <>
       <ErrContextProvider>
@@ -54,7 +54,7 @@ function App() {
       children: [
         { path: "/", Component: Landing }, 
         { path: "/home", Component: Home }, 
-        { path: "/reviews", Component: Reviews },
+        { path: "/reviews", Component: ReviewsPage },
         { path: "/profile", Component: Profile },
         // { element: <ProtectedRoute redirectPath="/" />,
         //   children: [

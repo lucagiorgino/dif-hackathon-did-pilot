@@ -5,29 +5,35 @@ import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
-import { Review } from '..';
+import { Review, Reviews } from '..';
+import { Row, Spinner } from 'react-bootstrap';
 
 function SearchBar() {
   const {web5, userDid} = useWeb5();
-  const [searchedDid, setSearchedDid] = useState<string>("");
-  const [searchResults, setSearchResults] = useState<DidReview[] | undefined>(undefined);
+  const [queryDid, setQueryDid] = useState<string>("");
+  const [reviews, setReviews] = useState<DidReview[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   const handleSearch = async () => {
-    console.log("searching for: ", searchedDid)
+    console.log("searching for: ", queryDid)
     if (web5) {
+      setSearched(true);
+      setLoading(true);
       const { parsedRecords } = await API.queryRecordsDWN(
         web5,
         {
           message: {
             filter: {
-              recipient: searchedDid,
+              recipient: queryDid,
             }
           }
         }
-      )
-      console.log("search results: ", parsedRecords)
+      );
+      console.log("search results: ", parsedRecords);
       if (parsedRecords)
-        setSearchResults(parsedRecords)
+        setReviews(parsedRecords);
+      setLoading(false);
     } 
   }
 
@@ -35,34 +41,28 @@ function SearchBar() {
     <>
         <Stack gap={2}>
             <Form.Group controlId="searchForm">
-                <Form.Control type="text" placeholder="Insert a did" className="me-auto" onChange={(e) => {setSearchedDid(e.target.value)}}/>
+                <Form.Control type="text" placeholder="Insert a did" className="me-auto" onChange={(e) => {setQueryDid(e.target.value); setSearched(false);}}/>
                 <Form.Text id="searchHelpBlock" muted>
                     Search for the reviews and stats of the inserted did.
                 </Form.Text>
             </Form.Group>
             <Button variant="dark" onClick={() => handleSearch()}>Search</Button>
         </Stack>
-        <h2>Search results:</h2>
-        <Stack gap={2}>
-          {
-            searchResults && searchResults.length > 0 ?
-              searchResults.map((review, index) => {
-                return (
-                  <Review 
-                    key={index} 
-                    didSubject={review.subjectDid}
-                    stars={review.stars}
-                    description={review.description}
-                  />
-                )
-              })
-            :
-              searchResults == undefined ? 
-                null    
-              :
-                <>No reviews found for {searchedDid}. Write you the first review!</>
-          }
-        </Stack>
+        {  searched ? 
+          <> 
+            <h4 className='text-center mt-4'>Results:</h4> {/* for {searchedDid}.*/}
+
+            {!loading ?
+            <Reviews reviews={reviews} />
+            : 
+            <Row className="justify-content-center mt-4">
+                <Spinner animation="border" variant="warning"/>
+            </Row>}
+          </>
+          :
+          null
+        } 
+        
     </>
   );
 }
