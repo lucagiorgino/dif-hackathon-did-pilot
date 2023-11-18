@@ -13,7 +13,6 @@ export function Navigation () {
     <Navbar sticky="top" bg="dark" variant="dark" expand="md">
         <Container fluid>
             <Navbar.Brand as={Link} to="/"><i className="bi bi-bookmark-star-fill me-2"></i>DID Pilot</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav>
                     <Nav.Link as={Link} to="/home" className='mx-2'>Home</Nav.Link>
@@ -32,6 +31,7 @@ export function Navigation () {
                 <Spinner  size="sm" animation="border" variant="light" />
                 }
             </Nav>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
         </Container>
     </Navbar>
     );

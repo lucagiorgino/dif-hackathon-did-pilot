@@ -2,13 +2,13 @@ import { Link } from "react-router-dom";
 
 export function Landing () {
     return <>
-    <div className="shadow p-5 bg-body rounded position-absolute top-50 start-50 translate-middle">
+    <div className="shadow p-5 bg-body rounded mt-3">
         <h1 className="display-3">
         Welcome to <strong>DID Pilot!</strong><br/>
         </h1>
         <p className="lead text-justify">
-        When you need to know if a service is safe what do you do on internet? Well, you simply search for reviews on <mark className="bg-success bg-opacity-10 text-success"><strong>TrustPilot</strong></mark>, right? 
-        So, why not apply the same approach to <mark className="bg-primary bg-opacity-10 text-primary"><strong>Decentralized Identifiers</strong></mark>?
+        When you need to know whether a service is safe what do you do? Well, you simply search for reviews on <mark className="bg-success bg-opacity-10 text-success"><strong>TrustPilot</strong></mark>, right? 
+        So, why not apply the same approach to <Link className="text-body-secondary text-decoration-none" target="_blank" to={`https://www.w3.org/TR/did-core/`}><mark className="bg-primary bg-opacity-10 text-primary"><strong>Decentralized Identifiers</strong></mark></Link>?
         </p>
 
         <hr className="my-4"/>
@@ -24,6 +24,5 @@ export function Landing () {
             </Link> 
         </h4>
     </div>
-    
     </>;
 }

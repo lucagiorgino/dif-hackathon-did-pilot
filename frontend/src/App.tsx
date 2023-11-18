@@ -22,12 +22,12 @@ function Layout() {
       <Web5ContextProvider>
       {/* <AuthContextProvider> */}
         <Navigation/> 
-        <Container className="mt-2" fluid>
-            <Row className="justify-content-md-center">
-              <Col sm={4} md={6}>
-                  <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
-              </Col>
-            </Row>
+        <Container className="mt-2 h-100" fluid>
+          <Row className="justify-content-center">
+            <Col md={6}>
+                <Outlet /> {/* 2️⃣ Render the app routes via the Layout Outlet */}
+            </Col>
+          </Row>
           <Row className="fixed-bottom">
             <Col className="mx-4 mb-2"><Error/></Col>
           </Row>
