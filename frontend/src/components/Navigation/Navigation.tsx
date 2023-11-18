@@ -1,11 +1,13 @@
 import { useWeb5 } from "@/hooks/useWeb5";
 import { removeCenterCharacter } from "@/utils";
-import { Badge, Container, Nav, Navbar, Spinner } from "react-bootstrap";
+import { useRef, useState } from "react";
+import { Badge, Button, Container, Nav, Navbar, Overlay, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
 export function Navigation () {
 
     const {userDid} = useWeb5();
+    const [copied, setCopied] = useState(false);
 
     return (
     <Navbar sticky="top" bg="dark" variant="dark" expand="md">
@@ -20,7 +22,15 @@ export function Navigation () {
                 </Nav>  
             </Navbar.Collapse>
             <Nav className="justify-content-end">
-                {userDid ?  <Badge bg="light" text="dark"> {removeCenterCharacter(userDid, 30)}</Badge> : <Spinner  size="sm" animation="border" variant="light" />}
+                {userDid ? 
+                    <OverlayTrigger placement="bottom"  delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{copied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setCopied(false)}>
+                        <Badge bg="light" text="dark" onClick={() => {navigator.clipboard.writeText(userDid); setCopied(true);}}>
+                            {removeCenterCharacter(userDid, 30)}
+                        </Badge>
+                    </OverlayTrigger>
+                : 
+                <Spinner  size="sm" animation="border" variant="light" />
+                }
             </Nav>
         </Container>
     </Navbar>
