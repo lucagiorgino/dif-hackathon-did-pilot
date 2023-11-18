@@ -148,7 +148,7 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
     return {
         totalReviews: reviews.length,
         averageStars: reviews.reduce((acc, curr) => acc + curr.stars, 0) / reviews.length,
-        reviewedSince: records ? (new Date(records[0].dateCreated)).toLocaleDateString() : "NA",
+        reviewedSince: records && records.length > 0 ? (new Date(records[0].dateCreated)).toLocaleDateString() : "NA",
         totalReviewers: reviewers.length
     }
 }
