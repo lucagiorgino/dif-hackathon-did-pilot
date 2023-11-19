@@ -7,6 +7,7 @@ import Stack from 'react-bootstrap/Stack';
 import { Reviews } from '..';
 import { Row, Spinner } from 'react-bootstrap';
 import didPilotReviewAPI, {DidStats} from '@/api/didPilotReview';
+import { Stats } from './Stats';
 
 function SearchBar() {
   const {web5} = useWeb5();
@@ -14,7 +15,7 @@ function SearchBar() {
   const [reviews, setReviews] = useState<DidReview[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [_stats, setStats] = useState<DidStats | undefined>(undefined); // TODO use stats
+  const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO use stats
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,8 +26,9 @@ function SearchBar() {
 
       const { reviews } = await didPilotReviewAPI.getReviewsByRecipient(web5, queryDid);
       const stats = await didPilotReviewAPI.getDidStats(web5, queryDid);
-      
+
       console.log("Results: ", reviews);
+      console.log("Stats: ", stats);
       
       setStats(stats);
       setReviews(reviews);
@@ -53,14 +55,17 @@ function SearchBar() {
             <h4 className='text-center mt-4'>Results:</h4> {/* for {searchedDid}.*/}
 
             {!loading ?
-            <Reviews reviews={reviews} />
+            <>
+              {reviews.length > 0 ? <Stats stats={stats}/> : <></>}
+              <Reviews reviews={reviews} />
+            </>
             : 
             <Row className="justify-content-center mt-4">
                 <Spinner animation="border" variant="warning"/>
             </Row>}
           </>
           :
-          null
+          <></>
         } 
         
     </>

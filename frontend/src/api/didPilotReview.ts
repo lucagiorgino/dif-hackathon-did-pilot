@@ -16,11 +16,16 @@ type ReviewsResponse = {
     reviews: DidReview[]
 }
 
+export type Stat = {
+    value: number | string,
+    textToDisplay: string
+}
+
 export type DidStats = {
-    totalReviews: number,
-    averageStars: number
-    reviewedSince: string,
-    totalReviewers: number
+    totalReviews: Stat,
+    averageStars: Stat,
+    reviewedSince: Stat,
+    totalReviewers: Stat
 }
 
 
@@ -145,11 +150,25 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
         }
     })
 
+    const options: Intl.DateTimeFormatOptions = { month: 'short', year: 'numeric' };
+
     return {
-        totalReviews: reviews.length,
-        averageStars: reviews.reduce((acc, curr) => acc + curr.stars, 0) / reviews.length,
-        reviewedSince: records && records.length > 0 ? (new Date(records[0].dateCreated)).toLocaleDateString() : "NA",
-        totalReviewers: reviewers.length
+        totalReviews: {
+            value: reviews.length, 
+            textToDisplay: "Total reviews"
+        },
+        averageStars: {
+            value: reviews.reduce((acc, curr) => acc + curr.stars, 0) / reviews.length, 
+            textToDisplay: "Average stars"
+        },
+        reviewedSince:  {
+            value: records && records.length > 0 ? (new Date(records[0].dateCreated)).toLocaleDateString('en-US', options) : "NA", //TODO: first date of a received review?
+            textToDisplay: "Reviewed since"
+        },
+        totalReviewers: {
+            value: reviewers.length,
+            textToDisplay: "Total reviewers"
+        }
     }
 }
 
