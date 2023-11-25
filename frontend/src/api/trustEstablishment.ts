@@ -1,6 +1,12 @@
-import { TrustEstablishmentDocument, TrustEstrablishmentDocumentSchema } from "@/types/trust-establishment";
+import {
+  Entries, 
+  TrustEstablishmentDocument, 
+  PartialTrustEstrablishmentDocumentSchema, 
+  GenericEntryPropertiesPattern 
+} from "@/types/trust-establishment";
 import Ajv from "ajv"
 import addFormats from "ajv-formats"
+import { randomUUID } from "crypto";
 
 const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
 addFormats(ajv);
@@ -32,8 +38,16 @@ const data = {
   }
 }
 
-export const testValidation = () => {
-  const validate = ajv.compile(TrustEstrablishmentDocumentSchema)
+type TrustEstablishmentDocumentOptions = {
+  author: string
+  version: string
+  entries: Entries
+  validFrom?: string
+  validUntil?: string
+}
+
+const testValidation = () => {
+  const validate = ajv.compile(getTrustEstablishmentDocumentSchema())
   const valid = validate(data)
   if (!valid) {
     console.log(validate.errors)
@@ -42,3 +56,43 @@ export const testValidation = () => {
     console.log(document)
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getTrustEstablishmentDocumentSchema = (properties?: object): any => {
+  const complete_schema = PartialTrustEstrablishmentDocumentSchema
+  if (!properties) {
+    complete_schema.properties.entries = {
+      ...complete_schema.properties.entries,
+      ...GenericEntryPropertiesPattern
+    }
+  } else {
+    complete_schema.properties.entries = {
+      ...complete_schema.properties.entries,
+      ...properties
+    }
+  }
+  return complete_schema
+}
+
+const createTrustEstablishmentDocument = (options: TrustEstablishmentDocumentOptions): TrustEstablishmentDocument => {
+  return {
+    id: randomUUID(),
+    created: new Date().toISOString(),
+    ...options
+  }
+}
+
+const validateTrustEstablishmentDocument = (document: TrustEstablishmentDocument, entries_definition: object): boolean => {
+  const validate = ajv.compile(getTrustEstablishmentDocumentSchema(entries_definition ? entries_definition : undefined))
+  const valid = validate(document)
+  if (!valid) {
+    console.log(validate.errors)
+    return false
+  } else {
+    console.log("Trust Establishment Document is valid")
+    return true
+  }
+}
+
+const trustEstablishmentDocumentAPI = { createTrustEstablishmentDocument, validateTrustEstablishmentDocument, testValidation };
+export default trustEstablishmentDocumentAPI;

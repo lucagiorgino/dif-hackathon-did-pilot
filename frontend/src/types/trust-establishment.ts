@@ -20,7 +20,7 @@ export type TrustEstablishmentDocument = {
   entries: Entries
 }
 
-export const TrustEstrablishmentDocumentSchema = {
+export const PartialTrustEstrablishmentDocumentSchema = {
   "required": [
     "id",
     "author"
@@ -61,37 +61,100 @@ export const TrustEstrablishmentDocumentSchema = {
     "entries": {
       "description": "Trust Establishment Document entries",
       "type": "object",
-      // "additionalProperties": false,
+      "additionalProperties": true
+    }
+  }
+}
+
+export const GenericEntryPropertiesPattern = {
+  "patternProperties": {
+    "^[a-z]$": {
+      "description": "Trust Establishment Document entry",
+      "type": "object",
+      "additionalProperties": true,
       "patternProperties": {
-        "^[a-z]$": {
-          "description": "Trust Establishment Document entry",
+        "^did:([a-z]+):([a-zA-Z0-9_.-]+)(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?$": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Trust Establishment Document topic",
+          "patternProperties": {
+            "^[a-z]$": {
+              "description": "Trust Establishment Document topic entry",
+              "type": "object",
+              "additionalProperties": true,
+            },
+          }
+        }
+      }
+    }
+  }
+}
+
+export const ReviewSchema = {
+  "patternProperties": {
+    "^[a-z]$": {
+      "description": "Trust Establishment Document entry",
+      "type": "object",
+      "additionalProperties": true,
+      "patternProperties": {
+        "^did:([a-z]+):([a-zA-Z0-9_.-]+)(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?$": {
+          "$id": "http://localhost:5341/schemas/review.schema.json",
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "DIDPilot Review schema",
+          "required": [
+            "subjectDid",
+            "stars",
+            "description"
+          ],
           "type": "object",
           "additionalProperties": false,
-          "patternProperties": {
-            "^did:([a-z]+):([a-zA-Z0-9_.-]+)(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?(:([a-zA-Z0-9_.-]+))?$": {
-              "type": "object",
-              "additionalProperties": false,
-              "description": "Trust Establishment Document entry review",
-              "properties": {
-                "subjectDid": {
-                  "description": "Trust Establishment Document entry review subject DID",
-                  "type": "string"
-                },
-                "stars": {
-                  "description": "Trust Establishment Document entry review stars",
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 5
-                },
-                "description": {
-                  "description": "Trust Establishment Document entry review description",
-                  "type": "string"
-                }
-              }
+          "properties": {
+            "subjectDid": {
+              "description": "Trust Establishment Document entry review subject DID",
+              "type": "string"
+            },
+            "stars": {
+              "description": "Trust Establishment Document entry review stars",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "description": {
+              "description": "Trust Establishment Document entry review description",
+              "type": "string"
             }
           }
         }
       }
+    }
+  }
+}
+
+export const ReviewFormalSchema = {
+  "$id": "http://localhost:5341/schemas/review-formal.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DIDPilot Review schema",
+  "required": [
+    "subjectDid",
+    "stars",
+    "description"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "subjectDid": {
+      "description": "Trust Establishment Document entry review subject DID",
+      "type": "string"
+    },
+    "stars": {
+      "description": "Trust Establishment Document entry review stars",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "description": {
+      "description": "Trust Establishment Document entry review description",
+      "type": "string"
     }
   }
 }

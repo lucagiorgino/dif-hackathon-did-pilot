@@ -5,6 +5,7 @@ import { useWeb5 } from "@/hooks/useWeb5";
 import { DidReview } from "@/types/types";
 import { Button, Container, Tooltip, OverlayTrigger, Modal, Form, Row, Spinner } from "react-bootstrap";
 import didPilotReviewAPI from "@/api/didPilotReview";
+import didPilotTEDReviewAPI, { TrustEstablishmentDocumentReview } from "@/api/didPilotTEDReview";
 import dwnConnectorAPI from "@/api/dwnConnector";
 
 export function ReviewsPage () {
@@ -19,15 +20,23 @@ export function ReviewsPage () {
 
     // get reviews from the DWN
     const [reviews, setReviews] = useState<DidReview[]>([]);
+    const [tedReviews, setTEDReviews] = useState<TrustEstablishmentDocumentReview[]>([]);
 
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
             setLoading(true);
-            const { reviews } = await didPilotReviewAPI.getReviewsByAuthor(web5, userDid);
+            // const { reviews } = await didPilotReviewAPI.getReviewsByAuthor(web5, userDid);
+            const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByAuthor(web5, userDid);
             
-            console.log("Results: ", reviews);
+            console.log("Results: ", tedReviews);
+            const reviews: DidReview[] = [];
+            for(const tedReview of tedReviews) {
+                const r = didPilotTEDReviewAPI.extractReviewFromTED(tedReview, userDid);
+                if (r) reviews.push(r);
+            }
             
             setReviews(reviews);
+            setTEDReviews(tedReviews);
             setLoading(false);
         } 
     }
@@ -69,7 +78,7 @@ export function ReviewsPage () {
         <p className="text-center">Contribute to the network and write a review. Reviews that you wrote: </p>
 
         {!loading && !web5Loading ?
-        <Reviews reviews={reviews}/>
+        <Reviews reviews={reviews} />
         : 
         <Row className="justify-content-center mt-4">
             <Spinner animation="border" variant="warning"/>

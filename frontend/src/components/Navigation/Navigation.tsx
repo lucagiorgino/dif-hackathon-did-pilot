@@ -18,6 +18,7 @@ export function Navigation () {
                     <Nav.Link as={Link} to="/home" className='mx-2'>Home</Nav.Link>
                     <Nav.Link as={Link} to="/reviews" className='mx-2'>Reviews</Nav.Link>
                     <Nav.Link as={Link} to="/profile" className='mx-2'>Profile</Nav.Link>
+                    <Nav.Link as={Link} to="/protocols" className='mx-2'>Protocols</Nav.Link>
                 </Nav>  
             </Navbar.Collapse>
             <Nav className="justify-content-end">

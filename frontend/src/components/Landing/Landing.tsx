@@ -1,4 +1,4 @@
-import { testValidation } from "@/api/trustEstablishment";
+import trustEstablishmentDocumentAPI from "@/api/trustEstablishment";
 import { Link } from "react-router-dom";
 
 export function Landing () {
@@ -25,6 +25,6 @@ export function Landing () {
             </Link> 
         </h4>
     </div>
-    <button onClick={testValidation}>Test Ajv</button>
+    <button onClick={trustEstablishmentDocumentAPI.testValidation}>Test Ajv</button>
     </>;
 }

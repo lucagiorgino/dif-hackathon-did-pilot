@@ -54,10 +54,13 @@ const queryRecords = async (web5: Web5, query: RecordsQueryRequest) => {
 
 // TODO: this function is not tested yet
 const queryProtocols = async (web5: Web5, query: ProtocolsQueryRequest) => {
-  const { protocols } = await web5.dwn.protocols.query({
+  const { protocols, status } = await web5.dwn.protocols.query({
       ...query
   });
-  return protocols;
+  return {
+    protocols,
+    status,
+  };
 }
 
 // TODO: this function is not tested yet

@@ -8,7 +8,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { Web5ContextProvider } from '@/hooks/useWeb5';
 
 // Components: 
-import { Home, Navigation, Landing, ReviewsPage, Profile, Error } from '@/components';
+import { Home, Navigation, Landing, ReviewsPage, Profile, Error, Protocols } from '@/components';
 
 // import { fn } from '@/api/web5API';
 import { ErrContextProvider } from './hooks/useError';
@@ -56,6 +56,7 @@ function App() {
         { path: "/home", Component: Home }, 
         { path: "/reviews", Component: ReviewsPage },
         { path: "/profile", Component: Profile },
+        { path: "/protocols", Component: Protocols },
         // { element: <ProtectedRoute redirectPath="/" />,
         //   children: [
         //     { path: "/some-protected-route", element: <SomeProtectedComponent> },
