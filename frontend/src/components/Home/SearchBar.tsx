@@ -50,20 +50,20 @@ function SearchBar() {
         </Stack>
       </Form>
 
-        {  searched ? 
-          <> 
-            <h4 className='text-center mt-4'>Results:</h4> {/* for {searchedDid}.*/}
+        { searched ? 
+            <> 
+              <h4 className='text-center mt-4'>Results:</h4> {/* for {searchedDid}.*/}
 
-            {!loading ?
-            <>
-              {reviews.length > 0 ? <Stats stats={stats}/> : <></>}
-              <Reviews reviews={reviews} />
+              {!loading ?
+              <>
+                {reviews.length > 0 ? <Stats stats={stats}/> : <></>}
+                <Reviews reviews={reviews} />
+              </>
+              : 
+              <Row className="justify-content-center mt-4">
+                  <Spinner animation="border" variant="warning"/>
+              </Row>}
             </>
-            : 
-            <Row className="justify-content-center mt-4">
-                <Spinner animation="border" variant="warning"/>
-            </Row>}
-          </>
           :
           <></>
         } 
