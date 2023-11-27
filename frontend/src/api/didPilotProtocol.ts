@@ -1,5 +1,6 @@
 import { Web5 } from "@web5/api";
 import dwnConnectorAPI from "./dwnConnector"
+import { reviewProtocolDefinition } from "../protocols/review/review.protocol";
 
 const installProtocol = async (
   web5: Web5, 
@@ -18,6 +19,13 @@ const installProtocol = async (
   return status;
 }
 
+const installReviewProtocol = async (
+  web5: Web5,
+  ownerDid: string,
+) => {
+  return await installProtocol(web5, reviewProtocolDefinition, ownerDid);
+}
+
 const getProtocolsByURI = async (
   web5: Web5, 
   protocolURI: string,
@@ -33,5 +41,5 @@ const getProtocolsByURI = async (
   return protocols;
 }
 
-const didPilotProtocolAPI = { installProtocol, getProtocolsByURI };
+const didPilotProtocolAPI = { installProtocol, getProtocolsByURI, installReviewProtocol };
 export default didPilotProtocolAPI;

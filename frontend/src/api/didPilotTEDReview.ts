@@ -11,6 +11,7 @@ import {
   ReviewSchema
 } from '@/types/trust-establishment';
 import trustEstablishmentDocumentAPI from './trustEstablishment';
+import { reviewProtocolDefinition } from '@/protocols/review/review.protocol';
 
 type TEDResponse = {
     record: Record | undefined,
@@ -48,49 +49,70 @@ export type TrustEstablishmentDocumentReview = {
   }
 }
 
-const createTEDReview = async (
-  web5: Web5, 
-  author: string, 
-  version: string, 
-  entries: Entries,
-  recipient: string,
+const createInteraction = async (
+    web5: Web5,
+    recipient: string,
+    proof: string,
 ) => {
-    // create TrustEstablishmentDocument with entries
-    const tedReview = trustEstablishmentDocumentAPI.createTrustEstablishmentDocument({
-      author: author,
-      version: version,
-      entries: entries
-    })
-    trustEstablishmentDocumentAPI.validateTrustEstablishmentDocument(tedReview, ReviewSchema)
     const record = await dwnConnector.writeRecord(web5, {
-        data: tedReview,
+        data: proof,
         message: {
-          dataFormat: 'application/json',
-          recipient: recipient,
+            dataFormat: 'text/plain',
+            recipient: recipient,
+            protocol: reviewProtocolDefinition.protocol,
+            protocolPath: 'interaction'
         },
     })
 
     return record
 }
 
-// update review (NOT AVAILABLE FOR TED)
-// const updateReviewById = async (web5: Web5, id: string, review: DidReview) => {
-//     const status = await dwnConnector.updateRecord(
-//         web5,
-//         {
-//             message: {
-//                 filter: {
-//                     recordId: id
-//                 }
-//             }
-//         },
-//         {
-//             data: review
-//         }
-//     )
+const deleteInteraction = async (
+    web5: Web5,
+    id: string,
+) => {
+    const deleteResult = await dwnConnector.deleteRecord(
+        web5, 
+        {
+            message: {
+                filter: {
+                    recordId: id
+                }
+            }
+        }
+    )
 
-//     return status
-// }
+    return deleteResult
+}
+
+const createTEDReview = async (
+    web5: Web5, 
+    author: string, 
+    version: string, 
+    entries: Entries,
+    recipient: string,
+    parentRecordId?: string,
+  ) => {
+      // create TrustEstablishmentDocument with entries
+      const tedReview = trustEstablishmentDocumentAPI.createTrustEstablishmentDocument({
+        author: author,
+        version: version,
+        entries: entries
+      })
+      trustEstablishmentDocumentAPI.validateTrustEstablishmentDocument(tedReview, ReviewSchema)
+      const record = await dwnConnector.writeRecord(web5, {
+          data: tedReview,
+          message: {
+            dataFormat: 'application/json',
+            recipient: recipient,
+            protocol: reviewProtocolDefinition.protocol,
+            protocolPath: 'review',
+            parentId: parentRecordId,
+          },
+      })
+  
+      return record
+  }
 
 // delete review
 const deleteTEDReviewById = async (web5: Web5, id: string) => {
@@ -131,6 +153,8 @@ const getTEDReviewsByAuthor = async (web5: Web5, author: string): Promise<TEDsRe
         message: {
             filter: {
                 dataFormat: "application/json",
+                protocol: reviewProtocolDefinition.protocol,
+                protocolPath: "review",
             }
         }
     })
@@ -138,13 +162,17 @@ const getTEDReviewsByAuthor = async (web5: Web5, author: string): Promise<TEDsRe
     return { records, teds: parsedRecords as TrustEstablishmentDocumentReview[] }
 }
 
-const getTEDReviewsByRecipient = async (web5: Web5, recipient: string): Promise<TEDsResponse> => {
+const getTEDReviewsByRecipient = async (web5: Web5, recipient: string, sorting?: string): Promise<TEDsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
         message: {
             filter: {
                 dataFormat: "application/json",
                 recipient: recipient,
-            }
+                protocol: reviewProtocolDefinition.protocol,
+                protocolPath: "review",
+            },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            dateSort: (sorting || "createdDescending") as any
         }
     })
 
@@ -229,6 +257,5 @@ export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: s
   return review
 }
 
-
-const didPilotTEDReviewAPI = { getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
+const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
 export default didPilotTEDReviewAPI;
