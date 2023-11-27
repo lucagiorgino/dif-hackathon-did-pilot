@@ -2,8 +2,8 @@ export const reviewProtocolDefinition = {
   "protocol": "https://didpilot.io",
   "published": true,
   "types": {
-    "profile": {
-      "schema": "https://didpilot.io/schemas/profile",
+    "interaction": {
+      "schema": "https://didpilot.io/schemas/interaction",
       "dataFormats": [
         "application/json"
       ]
@@ -16,7 +16,7 @@ export const reviewProtocolDefinition = {
     }
   },
   "structure": {
-    "profile": {
+    "interaction": {
       "$actions": [
         {
           "who": "anyone",
@@ -33,11 +33,10 @@ export const reviewProtocolDefinition = {
             "who": "anyone",
             "can": "read"
           },
-          // maybe this is not needed
           {
             "who": "author",
-            "of": "profile",
-            "can": "read"
+            "of": "interaction",
+            "can": "write"
           },
           {
             "who": "author",
