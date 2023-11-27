@@ -85,19 +85,60 @@ const deleteInteraction = async (
     return deleteResult
 }
 
+const getInteractionsByAuthor = async (
+    web5: Web5,
+    author: string
+) => {
+    const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
+        from: author,
+        message: {
+            filter: {
+                dataFormat: "text/plain",
+                protocol: reviewProtocolDefinition.protocol,
+                protocolPath: "interaction",
+            }
+        }
+    })
+
+    return { records, interactions: parsedRecords }
+}
+
+const getInteractionsByRecipient = async (
+    web5: Web5,
+    recipient: string,
+) => {
+    const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
+        message: {
+            filter: {
+                dataFormat: "text/plain",
+                protocol: reviewProtocolDefinition.protocol,
+                protocolPath: "interaction",
+                recipient: recipient
+            }
+        }
+    })
+
+    return { records, interactions: parsedRecords }
+}
+
 const createTEDReview = async (
     web5: Web5, 
     author: string, 
     version: string, 
-    entries: Entries,
+    review: DidReview,
     recipient: string,
     parentRecordId?: string,
+    contextId?: string,
   ) => {
       // create TrustEstablishmentDocument with entries
       const tedReview = trustEstablishmentDocumentAPI.createTrustEstablishmentDocument({
         author: author,
         version: version,
-        entries: entries
+        entries: {
+            "https://dif-hackathon-frontend.vercel.app//schemas/review": {
+                [author]: review
+            }
+        }
       })
       trustEstablishmentDocumentAPI.validateTrustEstablishmentDocument(tedReview, ReviewSchema)
       const record = await dwnConnector.writeRecord(web5, {
@@ -108,6 +149,7 @@ const createTEDReview = async (
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'review',
             parentId: parentRecordId,
+            contextId: contextId,
           },
       })
   
@@ -257,5 +299,5 @@ export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: s
   return review
 }
 
-const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
+const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getInteractionsByAuthor, getInteractionsByRecipient, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
 export default didPilotTEDReviewAPI;

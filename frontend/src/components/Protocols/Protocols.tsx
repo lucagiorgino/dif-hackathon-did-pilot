@@ -80,7 +80,8 @@ export function Protocols() {
             <Button variant="dark" onClick={handleProtocolInstallation()}>Install this protocol on your DWN</Button>
             <span className="text-center">No installed protocol found.</span>
             </>
-        }</>
+        }
+        </>
       :
         <Row className="justify-content-center mt-4">
           <Spinner animation="border" variant="warning" />

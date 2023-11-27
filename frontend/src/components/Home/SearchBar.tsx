@@ -1,18 +1,20 @@
 import { useWeb5 } from '@/hooks/useWeb5';
-import { DidReview } from '@/types/types';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
 import { Reviews } from '..';
 import { Row, Spinner } from 'react-bootstrap';
-import didPilotReviewAPI, {DidStats} from '@/api/didPilotReview';
+import {DidStats} from '@/api/didPilotReview';
 import { Stats } from './Stats';
+import { ReviewTuple } from '@/types/types';
+import didPilotTEDReviewAPI from '@/api/didPilotTEDReview';
 
 function SearchBar() {
   const {web5} = useWeb5();
+
   const [queryDid, setQueryDid] = useState<string>("");
-  const [reviews, setReviews] = useState<DidReview[]>([]);
+  const [reviews, setReviews] = useState<ReviewTuple[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO use stats
@@ -24,12 +26,22 @@ function SearchBar() {
       setSearched(true);
       setLoading(true);
 
-      const { reviews } = await didPilotReviewAPI.getReviewsByRecipient(web5, queryDid);
-      const stats = await didPilotReviewAPI.getDidStats(web5, queryDid);
+      const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByRecipient(web5, queryDid);
+      // const stats = await didPilotReviewAPI.getDidStats(web5, queryDid); // TODO: update stats api
 
-      console.log("Results: ", reviews);
+      console.log("Results: ", tedReviews);
       console.log("Stats: ", stats);
       
+      const reviews: ReviewTuple[] = [];
+      for(const tedReview of tedReviews) {
+          const r = didPilotTEDReviewAPI.extractReviewFromTED(tedReview, queryDid);
+          if (r) {
+              reviews.push({ted: tedReview, review: r});
+          } else {
+              console.log("Err", r);
+          }
+      }
+
       setStats(stats);
       setReviews(reviews);
       setLoading(false);

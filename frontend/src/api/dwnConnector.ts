@@ -46,7 +46,10 @@ const queryRecords = async (web5: Web5, query: RecordsQueryRequest) => {
   const parsedRecords = [];
   if (records) {
     for (const record of records) {
-      parsedRecords.push(await record.data.json());
+      if (record.dataFormat == 'application/json')
+        parsedRecords.push(await record.data.json());
+      else
+        parsedRecords.push(await record.data.text());
     }
   }
   return { records, parsedRecords };
