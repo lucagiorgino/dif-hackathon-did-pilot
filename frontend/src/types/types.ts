@@ -13,6 +13,7 @@ export type DidInteraction = {
   recordId: string;
   contextId: string;
   proof: string;
+  filled: boolean;
 }
 
 export type ReviewTuple = {

@@ -1,4 +1,4 @@
-import { DidReview } from '@/types/types';
+import { DidInteraction, DidReview } from '@/types/types';
 import {
     Web5,
     Record,
@@ -6,7 +6,6 @@ import {
 } from '@web5/api';
 import dwnConnector from './dwnConnector';
 import { 
-  Entries, 
   TrustEstablishmentDocument,
   ReviewSchema
 } from '@/types/trust-establishment';
@@ -21,6 +20,22 @@ type TEDResponse = {
 type TEDsResponse = {
     records: Record[] | undefined,
     teds: TrustEstablishmentDocumentReview[]
+}
+
+type InteractionResponse = {
+    record: Record | undefined,
+    interaction: DidInteraction | undefined
+}
+
+type InteractionsResponse = {
+    records: Record[] | undefined,
+    interactions: DidInteraction[] | undefined
+}
+
+type InteractionObj = {
+    interaction: DidInteraction,
+    authorReview?: DidReview,
+    recipientReview?: DidReview
 }
 
 export type Stat = {
@@ -53,7 +68,7 @@ const createInteraction = async (
     web5: Web5,
     recipient: string,
     proof: string,
-) => {
+): Promise<InteractionResponse> => {
     const record = await dwnConnector.writeRecord(web5, {
         data: proof,
         message: {
@@ -64,7 +79,12 @@ const createInteraction = async (
         },
     })
 
-    return record
+    return {
+        record,
+        interaction: record ? 
+            (await getInteractionObjFromRecord(record, proof)).interaction : 
+            undefined
+    }
 }
 
 const deleteInteraction = async (
@@ -88,7 +108,7 @@ const deleteInteraction = async (
 const getInteractionsByAuthor = async (
     web5: Web5,
     author: string
-) => {
+): Promise<InteractionsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
         from: author,
         message: {
@@ -100,13 +120,23 @@ const getInteractionsByAuthor = async (
         }
     })
 
-    return { records, interactions: parsedRecords }
+    // parse all records to DidInteraction objects
+    const interactions: DidInteraction[] = []
+    if (records) {
+        for(let i = 0; i < records.length; i++) {
+            interactions.push(
+                (await getInteractionObjFromRecord(records[i], parsedRecords[i])).interaction
+            )
+        }
+    }
+
+    return { records, interactions }
 }
 
 const getInteractionsByRecipient = async (
     web5: Web5,
     recipient: string,
-) => {
+): Promise<InteractionsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
         message: {
             filter: {
@@ -118,7 +148,33 @@ const getInteractionsByRecipient = async (
         }
     })
 
-    return { records, interactions: parsedRecords }
+    // parse all records to DidInteraction objects
+    const interactions: DidInteraction[] = []
+    if (records) {
+        for(let i = 0; i < records.length; i++) {
+            interactions.push(
+                (await getInteractionObjFromRecord(records[i], parsedRecords[i])).interaction
+            )
+        }
+    }
+
+    return { records, interactions }
+}
+
+const getPendingInteractions = async (
+    web5: Web5,
+    userDid: string,
+): Promise<DidInteraction[]> => {
+    let allInteractions: DidInteraction[] = []
+    const { interactions: recipientInteractions } = await getInteractionsByRecipient(web5, userDid)
+    const { interactions: authorInteractions } = await getInteractionsByAuthor(web5, userDid)
+    allInteractions = allInteractions.concat(recipientInteractions || [])
+    allInteractions = allInteractions.concat(authorInteractions || [])
+
+    // select only the interactions that are not filled
+    const interactions = allInteractions.filter(interaction => !interaction.filled)
+
+    return interactions
 }
 
 const createTEDReview = async (
@@ -129,7 +185,7 @@ const createTEDReview = async (
     recipient: string,
     parentRecordId?: string,
     contextId?: string,
-  ) => {
+) => {
       // create TrustEstablishmentDocument with entries
       const tedReview = trustEstablishmentDocumentAPI.createTrustEstablishmentDocument({
         author: author,
@@ -221,6 +277,21 @@ const getTEDReviewsByRecipient = async (web5: Web5, recipient: string, sorting?:
     return { records, teds: parsedRecords as TrustEstablishmentDocumentReview[] }
 }
 
+const getTEDReviewsByInteractionId = async (web5: Web5, interactionId: string): Promise<TEDsResponse> => {
+    const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
+        message: {
+            filter: {
+                dataFormat: "application/json",
+                protocol: reviewProtocolDefinition.protocol,
+                protocolPath: "review",
+                parentId: interactionId
+            }
+        }
+    })
+
+    return { records, teds: parsedRecords as TrustEstablishmentDocumentReview[] }
+}
+
 const getReviews = async (web5: Web5, query: RecordsQueryRequest): Promise<TEDsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, query)
 
@@ -299,5 +370,34 @@ export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: s
   return review
 }
 
-const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getInteractionsByAuthor, getInteractionsByRecipient, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
+const getInteractionObjFromRecord = async (record: Record, proof: string, web5?: Web5): Promise<InteractionObj> => {
+    let authorReview: DidReview | undefined
+    let recipientReview: DidReview | undefined
+    if (web5) {
+        // get reviews from this record id and extract the review
+        const reviews = await getTEDReviewsByInteractionId(web5, record.id)
+        // extract all reviews from TED to see if there is at least one with record.author as author and one with record.recipient as author
+        const authorTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.author))
+        const recipientTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.recipient))
+        authorReview = authorTEDReview ? extractReviewFromTED(authorTEDReview, record.author) : undefined
+        recipientReview = recipientTEDReview ? extractReviewFromTED(recipientTEDReview, record.recipient) : undefined
+    }
+    console.log("authorReview", authorReview)
+    console.log("recipientReview", recipientReview)
+    return {
+        interaction: {
+            author: record.author,
+            recipient: record.recipient,
+            createdDate: record.dateCreated,
+            recordId: record.protocol,
+            contextId: record.contextId,
+            proof: proof,
+            filled: (authorReview !== undefined && recipientReview !== undefined) ? true : false
+        },
+        authorReview,
+        recipientReview
+    }
+}
+
+const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getInteractionsByAuthor, getInteractionsByRecipient, getPendingInteractions, getInteractionObjFromRecord, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
 export default didPilotTEDReviewAPI;
