@@ -69,15 +69,19 @@ const createInteraction = async (
     recipient: string,
     proof: string,
 ): Promise<InteractionResponse> => {
+    console.log("reviewProtocolDefinition", reviewProtocolDefinition.protocol)
     const record = await dwnConnector.writeRecord(web5, {
         data: proof,
         message: {
-            dataFormat: 'text/plain',
+            dataFormat: 'application/json',
             recipient: recipient,
             protocol: reviewProtocolDefinition.protocol,
-            protocolPath: 'interaction'
+            protocolPath: 'interaction',
+            schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
         },
     })
+
+    console.log("record returned", record)
 
     return {
         record,
@@ -115,7 +119,8 @@ const getInteractionsByAuthor = async (
             filter: {
                 dataFormat: "text/plain",
                 protocol: reviewProtocolDefinition.protocol,
-                protocolPath: "interaction",
+                protocolPath: 'interaction',
+                schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
             }
         }
     })
@@ -141,9 +146,10 @@ const getInteractionsByRecipient = async (
         message: {
             filter: {
                 dataFormat: "text/plain",
+                recipient: recipient,
                 protocol: reviewProtocolDefinition.protocol,
-                protocolPath: "interaction",
-                recipient: recipient
+                protocolPath: 'interaction',
+                schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
             }
         }
     })

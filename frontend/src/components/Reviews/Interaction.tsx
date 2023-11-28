@@ -2,16 +2,13 @@ import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
 import dwnConnectorAPI from "@/api/dwnConnector";
 import { useError } from "@/hooks/useError";
 import { useWeb5 } from "@/hooks/useWeb5";
+import { DidInteraction } from "@/types/types";
 import { useState } from "react";
 import { Button, Form, Modal, OverlayTrigger, Spinner, Toast, Tooltip } from "react-bootstrap";
 import RangeSlider from "react-bootstrap-range-slider";
 
 export function Interaction(props: {
-  interactionId: string,
-  contextId: string,
-  didAuthor: string,  
-  didRecipient: string, 
-  creationTime: string, 
+  interaction: DidInteraction,
   trigger: boolean,
   setTrigger: (arg0: boolean) => void
 }) {
@@ -40,8 +37,8 @@ export function Interaction(props: {
                 description: description  
               },
               subjectDid,
-              props.interactionId,
-              props.contextId
+              props.interaction.recordId,
+              props.interaction.contextId
             );
             console.log("ee:", record);
             // send data to the DWN instantly
@@ -54,12 +51,12 @@ export function Interaction(props: {
           props.setTrigger(!props.trigger);
       }
     }
-
+    // TODO: modify cratedDate
     return <>  
       <Toast className="mx-1">
           <Toast.Header closeButton={false}>
-            <strong className="me-auto">{props.didAuthor}</strong>
-            <small>{props.creationTime}</small>
+            <strong className="me-auto">{props.interaction.recipient ? props.interaction.recipient : props.interaction.author}</strong>
+            <small>{props.interaction.createdDate}</small> 
             <OverlayTrigger
               placement="right"
               overlay={<Tooltip id="button-tooltip">Create a review!</Tooltip>}

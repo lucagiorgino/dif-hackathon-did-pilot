@@ -1,8 +1,8 @@
 import { Interaction, Reviews } from ".";
 import { useEffect, useState } from "react";
 import { useWeb5 } from "@/hooks/useWeb5";
-import { ReviewTuple } from "@/types/types";
-import { Container, Tooltip, OverlayTrigger, Row, Spinner } from "react-bootstrap";
+import { DidInteraction, ReviewTuple } from "@/types/types";
+import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert } from "react-bootstrap";
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
 
 export function ReviewsPage () {
@@ -10,10 +10,31 @@ export function ReviewsPage () {
     const {web5, userDid, web5Loading} = useWeb5();
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false);
+    const [modalShow, setModalShow] = useState(false);
+    const [proof, setProof] = useState("stub_proof");
+    const [recipientDid, setRecipientDid] = useState("");
+    const [publishingLoading, setPublishingLoading] = useState(false);
 
     // get reviews from the DWN
     const [reviews, setReviews] = useState<ReviewTuple[]>([]);
-    const [_interactions, setInteractions] = useState<ReviewTuple[]>([]);
+    const [interactions, setInteractions] = useState<DidInteraction[]>([]);
+
+    const handlePublish = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        if (web5 && userDid) {
+            setPublishingLoading(true);
+
+            const {record, interaction} = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
+
+            console.log("Interaction: ", interaction);
+            console.log("Record", record);
+
+            setPublishingLoading(false);
+            setModalShow(false);
+            setTrigger(!trigger);
+        }
+    }
 
     useEffect(() => {
 
@@ -39,7 +60,14 @@ export function ReviewsPage () {
         }
 
         const getPendingInteractionsFromDWN = async () => {
-            // todo
+            if (web5 && userDid) {
+                setLoading(true);
+                const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
+                console.log("Interactions: ", interactions);
+
+                setInteractions(interactions);
+                setLoading(false);
+            } 
         }
 
         getPendingInteractionsFromDWN();
@@ -53,49 +81,21 @@ export function ReviewsPage () {
                 <h1>Your Reviews</h1>
             </OverlayTrigger>
         </div>
-        
+        <Button className="my-2 position-absolute top-0 end-0" variant="outline-danger" onClick={() => {setModalShow(true);}}><i className="bi bi-plus-circle-fill"/></Button>
+
         <Row>
             <h4 className="my-auto">Pending interactions</h4>
             <Row className="mb-5 p-2 g-2 flex-row flex-nowrap shadow bg-body rounded"
                 style={{overflowX: "auto"}}
             >   
-    
+                {interactions.length>0 && interactions.map((interaction, index) => (
                     <Interaction
-                        interactionId={"1"}
-                        contextId="aa"
-                        didAuthor={"did:a"}
-                        didRecipient={"did:b"}
-                        creationTime="1 mins ago"
+                        key={index} 
+                        interaction={interaction}
                         trigger={trigger}
                         setTrigger={setTrigger}
                     />
-                    <Interaction
-                    interactionId={"1"}
-                    contextId="aa"
-                    didAuthor={"did:a"}
-                    didRecipient={"did:b"}
-                    creationTime="3 mins ago"
-                    trigger={trigger}
-                    setTrigger={setTrigger}
-                    />
-                    <Interaction
-                    interactionId={"1"}
-                    contextId="aa"
-                    didAuthor={"did:a"}
-                    didRecipient={"did:b"}
-                    creationTime="5 mins ago"
-                    trigger={trigger}
-                    setTrigger={setTrigger}
-                    />
-                    <Interaction
-                    interactionId={"1"}
-                    contextId="aa"
-                    didAuthor={"did:a"}
-                    didRecipient={"did:b"}
-                    creationTime="7 mins ago"
-                    trigger={trigger}
-                    setTrigger={setTrigger}
-                    />
+                ))}
             </Row>
         </Row>
 
@@ -111,6 +111,37 @@ export function ReviewsPage () {
         }
     </Container>
     
+    <Modal show={modalShow} onHide={() => {setModalShow(false);}}>
+        <Form onSubmit={handlePublish}>
+        <Modal.Header closeButton>
+                <Modal.Title>Add a stub interaction</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form.Group className="mb-3" controlId="formDid">
+                    <Form.Label><strong>DID recipient</strong></Form.Label>
+                    <Form.Control type="text" placeholder="Insert a DID" onChange={(e) => setRecipientDid(e.target.value)} />
+                    <Form.Text className="text-muted">
+                        Did of the other party of the interaction.
+                    </Form.Text>
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="formProof">
+                    <Form.Label><strong>Interaction proof</strong></Form.Label>
+                    <Form.Control as="textarea" rows={3} placeholder="Insert the proof" value={proof} onChange={(e) => setProof(e.target.value)} />
+                    <Form.Text className="text-muted">
+                        Proof that the interaction has occured.
+                    </Form.Text>
+                </Form.Group>
+                <Alert variant="danger">
+                    This form is intended for demonstration purposes. An interaction refers to an event that takes place between two parties outside of the platform. Upon completion of the interaction, the parties publish an interaction record on the DWN. The proof included in the interaction record is generated at the conclusion of the interaction and serves to verify that the interaction has indeed occurred. An example of such proof could be a multisignature executed by both parties.
+                </Alert>
+            </Modal.Body>
+            <Modal.Footer className="justify-content-center">
+                <Button variant="dark" type="submit">
+                { publishingLoading ? <Spinner animation="border" variant="warning" size="sm"/> :"Publish stub interaction" }
+                </Button>
+            </Modal.Footer>
+        </Form>
+    </Modal>
     
     </>;
 }

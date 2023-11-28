@@ -11,9 +11,10 @@ import {
 } from '@web5/api';
 
 const writeRecord = async (web5: Web5, request: RecordsCreateRequest) => {
-  const { record } = await web5.dwn.records.create({
+  const { record, status } = await web5.dwn.records.create({
     ...request
   });
+  console.log("Write status:", status)
   return record;
 }
 
