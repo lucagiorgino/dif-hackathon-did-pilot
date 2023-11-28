@@ -6,6 +6,15 @@ export type DidReview = {
   description: string;
 } 
 
+export type DidInteraction = {
+  author: string;
+  recipient: string;
+  createdDate: string;
+  recordId: string;
+  contextId: string;
+  proof: string;
+}
+
 export type ReviewTuple = {
   ted: TrustEstablishmentDocumentReview,
   review: DidReview
