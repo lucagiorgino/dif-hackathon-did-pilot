@@ -2,7 +2,7 @@ import { Interaction, Reviews } from ".";
 import { useEffect, useState } from "react";
 import { useWeb5 } from "@/hooks/useWeb5";
 import { DidInteraction, ReviewTuple } from "@/types/types";
-import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert } from "react-bootstrap";
+import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert, Badge } from "react-bootstrap";
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
 import { useError } from "@/hooks/useError";
 
@@ -17,6 +17,8 @@ export function ReviewsPage () {
     const [proof, setProof] = useState("stub_proof");
     const [recipientDid, setRecipientDid] = useState("");
     const [publishingLoading, setPublishingLoading] = useState(false);
+    const [interactionsLoading, setInteractionsLoading] = useState(false);
+
 
     // get reviews from the DWN
     const [reviews, setReviews] = useState<ReviewTuple[]>([]);
@@ -36,7 +38,6 @@ export function ReviewsPage () {
                 if (err instanceof Error) setError(err);
             }
             
-
             setPublishingLoading(false);
             setModalShow(false);
             setTrigger(!trigger);
@@ -47,12 +48,12 @@ export function ReviewsPage () {
 
         const getPendingInteractionsFromDWN = async () => {
             if (web5 && userDid) {
-                setLoading(true);
+                setInteractionsLoading(true);
                 const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
                 // console.log("Interactions: ", interactions);
 
                 setInteractions(interactions);
-                setLoading(false);
+                setInteractionsLoading(false);
             } 
         }
 
@@ -91,21 +92,27 @@ export function ReviewsPage () {
             placement="right"
             overlay={<Tooltip id="button-tooltip">Create a stub interaction!</Tooltip>}
         >
-        <Button className="my-2 position-absolute top-0 end-0" variant="outline-danger" onClick={() => {setModalShow(true);}}><i className="bi bi-plus-circle-fill"/></Button>
+            <Button className="my-2 position-absolute top-0 end-0" variant="outline-danger" onClick={() => {setModalShow(true);}}>
+                <i className="bi bi-plus-circle-fill"/>
+            </Button>
         </OverlayTrigger>
         <Row>
-            <h4 className="my-auto">Pending interactions</h4>
+            <h4 className="my-auto">Pending interactions <Badge bg="warning" text="dark">{interactions.length}</Badge></h4>
             <Row className="mb-5 p-2 g-2 flex-row flex-nowrap shadow bg-body rounded"
                 style={{overflowX: "auto"}}
-            >   
-                {interactions.length>0 && interactions.map((interaction, index) => (
+            >   {!interactionsLoading ?
+                <>{interactions.length>0 && interactions.map((interaction, index) => (
                     <Interaction
                         key={index} 
                         interaction={interaction}
                         trigger={trigger}
                         setTrigger={setTrigger}
                     />
-                ))}
+                ))}</>
+                :
+                <Row className="justify-content-center">
+                    <Spinner animation="border" variant="warning"/>
+                </Row>}
             </Row>
         </Row>
 

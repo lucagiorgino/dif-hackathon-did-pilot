@@ -47,7 +47,8 @@ export type DidStats = {
     totalReviews: Stat,
     averageStars: Stat,
     reviewedSince: Stat,
-    totalReviewers: Stat
+    totalReviewers: Stat,
+    totalInteractions: Stat
 }
 
 export type TrustEstablishmentDocumentReview = {
@@ -339,6 +340,9 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
                 filter: {
                     dataFormat: "application/json",
                     recipient: did,
+                    protocol: reviewProtocolDefinition.protocol,
+                    protocolPath: "interaction/review",
+                    schema: reviewProtocolDefinition.types.review.schema
                 },
                 // TODO: check if this is OKAY for us
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -346,6 +350,8 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
             }
         }
     )
+    const { interactions } = await getInteractionsByRecipient(web5, did)
+    
     console.log("records", records)
     console.log("teds", teds)
     console.log("did", did)
@@ -378,6 +384,10 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
         totalReviewers: {
             value: reviewers.length,
             textToDisplay: "Total reviewers"
+        },
+        totalInteractions: {
+            value: interactions?.length || 0,
+            textToDisplay: "Total interactions"
         }
     }
 }

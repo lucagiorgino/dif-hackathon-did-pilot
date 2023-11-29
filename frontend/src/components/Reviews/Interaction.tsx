@@ -55,9 +55,18 @@ export function Interaction(props: {
           props.setTrigger(!props.trigger);
       }
     }
-    // TODO: modify cratedDate
+
+    const handleDelete = async () => {
+      if (web5 && userDid) {
+
+        let res = await didPilotTEDReviewAPI.deleteInteraction(web5, props.interaction.recordId);
+        console.log("Delete:", res);
+        props.setTrigger(!props.trigger);
+      }
+    }
+
     return <>  
-      <Toast className="mx-1">
+      <Toast className="mx-1 my-auto">
           <Toast.Header closeButton={false}>
             <strong className="me-auto">Pending</strong>
             <small>{props.interaction.createdDate}</small> 
@@ -71,9 +80,17 @@ export function Interaction(props: {
             </OverlayTrigger>
             <OverlayTrigger
               placement="right"
+              overlay={<Tooltip id="button-tooltip">Show interaction details</Tooltip>}
+            >
+              <Button className="ms-2" size="sm" variant="outline-dark" onClick={() => {console.log("todo: show interaction details")}}>
+                <i className="bi bi-info-lg"/>
+              </Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+              placement="right"
               overlay={<Tooltip id="button-tooltip">Remove from pending interactions!</Tooltip>}
             >
-              <Button className="ms-2" size="sm" variant="outline-dark" onClick={() => {console.log("Delete!")}}>
+              <Button className="ms-2" size="sm" variant="outline-dark" onClick={handleDelete}>
                 <i className="bi bi-trash-fill"/>
               </Button>
             </OverlayTrigger>

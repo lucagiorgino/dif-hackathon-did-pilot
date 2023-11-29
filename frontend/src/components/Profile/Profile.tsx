@@ -3,23 +3,22 @@ import { useEffect, useState } from "react";
 import { Tooltip, OverlayTrigger, Row, Spinner} from "react-bootstrap";
 import { Reviews } from "..";
 import { ReviewTuple } from "@/types/types";
-import { DidStats } from "@/api/didPilotReview";
 import { Stats } from "../Home/Stats";
-import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
+import didPilotTEDReviewAPI, { DidStats } from "@/api/didPilotTEDReview";
 
 export function Profile () {
     const {web5, userDid, web5Loading} = useWeb5();
 
     const [reviews, setReviews] = useState<ReviewTuple[]>([]);
     const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO: use stats
+    const [stats, setStats] = useState<DidStats | undefined>(undefined);
 
    
     const getReviewsFromDWN = async () => {
         if (web5 && userDid) {
             setLoading(true);
             const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByRecipient(web5, userDid);
-            // const stats = await didPilotReviewAPI.getDidStats(web5, userDid); // TODO: update stats api
+            const stats = await didPilotTEDReviewAPI.getDidStats(web5, userDid);
 
             console.log("Results: ", tedReviews);
             const reviews: ReviewTuple[] = [];
@@ -32,7 +31,7 @@ export function Profile () {
                 }
             }
             
-            // setStats(stats);
+            setStats(stats);
             setReviews(reviews);
             setLoading(false);
         } 

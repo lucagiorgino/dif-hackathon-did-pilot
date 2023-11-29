@@ -5,10 +5,9 @@ import Form from 'react-bootstrap/Form';
 import Stack from 'react-bootstrap/Stack';
 import { Reviews } from '..';
 import { Row, Spinner } from 'react-bootstrap';
-import {DidStats} from '@/api/didPilotReview';
 import { Stats } from './Stats';
 import { ReviewTuple } from '@/types/types';
-import didPilotTEDReviewAPI from '@/api/didPilotTEDReview';
+import didPilotTEDReviewAPI, { DidStats } from '@/api/didPilotTEDReview';
 
 function SearchBar() {
   const {web5} = useWeb5();
@@ -17,7 +16,7 @@ function SearchBar() {
   const [reviews, setReviews] = useState<ReviewTuple[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [stats, setStats] = useState<DidStats | undefined>(undefined); // TODO use stats
+  const [stats, setStats] = useState<DidStats | undefined>(undefined);
 
   const handleSearch = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -27,7 +26,7 @@ function SearchBar() {
       setLoading(true);
 
       const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByRecipient(web5, queryDid);
-      // const stats = await didPilotReviewAPI.getDidStats(web5, queryDid); // TODO: update stats api
+      const stats = await didPilotTEDReviewAPI.getDidStats(web5, queryDid);
 
       console.log("Results: ", tedReviews);
       console.log("Stats: ", stats);
