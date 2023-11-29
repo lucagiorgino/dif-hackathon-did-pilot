@@ -421,11 +421,13 @@ const getInteractionObjFromRecord = async (record: Record, proof: string, web5?:
     }
     // console.log("authorReview", authorReview)
     // console.log("recipientReview", recipientReview)
+    const options: Intl.DateTimeFormatOptions = { dateStyle: 'medium' };
+
     return {
         interaction: {
             author: record.author,
             recipient: record.recipient,
-            createdDate: record.dateCreated,
+            createdDate: new Date(record.dateCreated).toLocaleDateString('en-US', options),
             recordId: record.id,
             contextId: record.contextId,
             proof: proof,

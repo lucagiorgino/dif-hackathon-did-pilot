@@ -15,6 +15,9 @@ const writeRecord = async (web5: Web5, request: RecordsCreateRequest) => {
     ...request
   });
   console.log("Write status:", status)
+  if (status.code > 300) {
+    throw new Error(status.detail);
+  }
   return record;
 }
 

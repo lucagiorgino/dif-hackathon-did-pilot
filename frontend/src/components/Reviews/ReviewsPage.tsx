@@ -4,10 +4,13 @@ import { useWeb5 } from "@/hooks/useWeb5";
 import { DidInteraction, ReviewTuple } from "@/types/types";
 import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert } from "react-bootstrap";
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
+import { useError } from "@/hooks/useError";
 
 export function ReviewsPage () {
     
     const {web5, userDid, web5Loading} = useWeb5();
+    const {setError} = useError();
+
     const [loading, setLoading] = useState(false);
     const [trigger, setTrigger] = useState(false);
     const [modalShow, setModalShow] = useState(false);
@@ -25,10 +28,14 @@ export function ReviewsPage () {
         if (web5 && userDid) {
             setPublishingLoading(true);
 
-            const {record, interaction} = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
-
-            console.log("Interaction: ", interaction);
-            console.log("Record", record);
+            try {
+                const {record, interaction} = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
+                console.log("Interaction: ", interaction);
+                console.log("Record", record);
+            } catch (err) {
+                if (err instanceof Error) setError(err);
+            }
+            
 
             setPublishingLoading(false);
             setModalShow(false);
@@ -80,8 +87,12 @@ export function ReviewsPage () {
                 <h1>Your Reviews</h1>
             </OverlayTrigger>
         </div>
+        <OverlayTrigger
+            placement="right"
+            overlay={<Tooltip id="button-tooltip">Create a stub interaction!</Tooltip>}
+        >
         <Button className="my-2 position-absolute top-0 end-0" variant="outline-danger" onClick={() => {setModalShow(true);}}><i className="bi bi-plus-circle-fill"/></Button>
-
+        </OverlayTrigger>
         <Row>
             <h4 className="my-auto">Pending interactions</h4>
             <Row className="mb-5 p-2 g-2 flex-row flex-nowrap shadow bg-body rounded"

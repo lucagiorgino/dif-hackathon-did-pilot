@@ -1,5 +1,5 @@
 export const reviewProtocolDefinition = {
-  "protocol": "https://dif-hackathon-frontend.vercel.app/",
+  "protocol": "https://dif-hackathon-frontend.vercel.app/did-pilot-protocol.json",
   "published": true,
   "types": {
     "interaction": {

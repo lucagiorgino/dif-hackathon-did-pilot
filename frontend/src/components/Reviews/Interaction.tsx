@@ -69,6 +69,14 @@ export function Interaction(props: {
                 <i className="bi bi-plus-circle-fill"/>
               </Button>
             </OverlayTrigger>
+            <OverlayTrigger
+              placement="right"
+              overlay={<Tooltip id="button-tooltip">Remove from pending interactions!</Tooltip>}
+            >
+              <Button className="ms-2" size="sm" variant="outline-dark" onClick={() => {console.log("Delete!")}}>
+                <i className="bi bi-trash-fill"/>
+              </Button>
+            </OverlayTrigger>
           </Toast.Header>
       </Toast>
 
