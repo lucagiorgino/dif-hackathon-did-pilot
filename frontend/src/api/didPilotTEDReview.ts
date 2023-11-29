@@ -29,7 +29,7 @@ type InteractionResponse = {
 
 type InteractionsResponse = {
     records: Record[] | undefined,
-    interactions: DidInteraction[] | undefined
+    interactions: InteractionObj[] | undefined
 }
 
 type InteractionObj = {
@@ -73,7 +73,7 @@ const createInteraction = async (
     const record = await dwnConnector.writeRecord(web5, {
         data: proof,
         message: {
-            dataFormat: 'application/json',
+            dataFormat: 'text/plain',
             recipient: recipient,
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'interaction',
@@ -126,11 +126,11 @@ const getInteractionsByAuthor = async (
     })
 
     // parse all records to DidInteraction objects
-    const interactions: DidInteraction[] = []
+    const interactions: InteractionObj[] = []
     if (records) {
         for(let i = 0; i < records.length; i++) {
             interactions.push(
-                (await getInteractionObjFromRecord(records[i], parsedRecords[i])).interaction
+                await getInteractionObjFromRecord(records[i], parsedRecords[i], web5)
             )
         }
     }
@@ -155,11 +155,11 @@ const getInteractionsByRecipient = async (
     })
 
     // parse all records to DidInteraction objects
-    const interactions: DidInteraction[] = []
+    const interactions: InteractionObj[] = []
     if (records) {
         for(let i = 0; i < records.length; i++) {
             interactions.push(
-                (await getInteractionObjFromRecord(records[i], parsedRecords[i])).interaction
+                await getInteractionObjFromRecord(records[i], parsedRecords[i], web5)
             )
         }
     }
@@ -171,14 +171,30 @@ const getPendingInteractions = async (
     web5: Web5,
     userDid: string,
 ): Promise<DidInteraction[]> => {
-    let allInteractions: DidInteraction[] = []
+    let allInteractions: InteractionObj[] = []
     const { interactions: recipientInteractions } = await getInteractionsByRecipient(web5, userDid)
     const { interactions: authorInteractions } = await getInteractionsByAuthor(web5, userDid)
+    // console.log("recipientInteractions", recipientInteractions)
+    // console.log("authorInteractions", authorInteractions)
     allInteractions = allInteractions.concat(recipientInteractions || [])
     allInteractions = allInteractions.concat(authorInteractions || [])
 
     // select only the interactions that are not filled
-    const interactions = allInteractions.filter(interaction => !interaction.filled)
+    // or there are no reviews from the selected user
+    const interactions = allInteractions.filter(interaction => 
+        !interaction.interaction.filled && 
+        (
+            (
+                interaction.interaction.author == userDid &&
+                interaction.authorReview == undefined
+            ) 
+            &&
+            (
+                interaction.interaction.recipient == userDid &&
+                interaction.recipientReview == undefined
+            )
+        )
+    ).map(interaction => interaction.interaction)
 
     return interactions
 }
@@ -209,9 +225,10 @@ const createTEDReview = async (
             dataFormat: 'application/json',
             recipient: recipient,
             protocol: reviewProtocolDefinition.protocol,
-            protocolPath: 'review',
+            protocolPath: 'interaction/review',
             parentId: parentRecordId,
             contextId: contextId,
+            schema: reviewProtocolDefinition.types.review.schema
           },
       })
   
@@ -252,16 +269,23 @@ const getTEDReviewById = async (web5: Web5, id: string): Promise<TEDResponse> =>
 
 // query reviews
 const getTEDReviewsByAuthor = async (web5: Web5, author: string): Promise<TEDsResponse> => {
+    console.log(author === "did:ion:EiB6xXBzWlMoHz3BBcJOcWxeYn4ANwtpjIg9FqB2hcQJXQ:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJkd24tc2lnIiwicHVibGljS2V5SndrIjp7ImNydiI6IkVkMjU1MTkiLCJrdHkiOiJPS1AiLCJ4IjoiVTJQUUJiOENtOFd2WHJtd2RUenNEOHVyR3lBX3dvb3BsejVicXBFVHFESSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifSx7ImlkIjoiZHduLWVuYyIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJzZWNwMjU2azEiLCJrdHkiOiJFQyIsIngiOiJxVm10QTllLUIwUzRaLU5OUmNpLWxBQjUyMUNOQWdPX1c4MTFkWGZLbUZjIiwieSI6IlpQbDhDTzl6NjY2Y0l3aFhZRXNPRkFFTExndEdCcG5lV0JfSmJuUlRsdEkifSwicHVycG9zZXMiOlsia2V5QWdyZWVtZW50Il0sInR5cGUiOiJKc29uV2ViS2V5MjAyMCJ9XSwic2VydmljZXMiOlt7ImlkIjoiZHduIiwic2VydmljZUVuZHBvaW50Ijp7ImVuY3J5cHRpb25LZXlzIjpbIiNkd24tZW5jIl0sIm5vZGVzIjpbImh0dHBzOi8vZHduLnRiZGRldi5vcmcvZHduMiIsImh0dHBzOi8vZHduLnRiZGRldi5vcmcvZHduMCJdLCJzaWduaW5nS2V5cyI6WyIjZHduLXNpZyJdfSwidHlwZSI6IkRlY2VudHJhbGl6ZWRXZWJOb2RlIn1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlDdDFWLXhmdzh0M0pMd09MdEgzTngtNUhqVXppX05ZSS13Snl2ZGlRcGxDQSJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpQUJmd3BVUVRNZjhUNTE3Tnh0RmNmbFF6dk5nQUQ3N0p0OFdIXzc1cGFKZkEiLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUJ3b2t6OTM0cTJGYVM4MG9ST01TdkgzLVUyLVpJNW5zZm9TYlRfZ3RhdG1RIn19")
+
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
-        from: author,
+        // from: author,
         message: {
             filter: {
                 dataFormat: "application/json",
                 protocol: reviewProtocolDefinition.protocol,
-                protocolPath: "review",
+                protocolPath: "interaction/review",
+                schema: reviewProtocolDefinition.types.review.schema,
+                // parentId: parentId
             }
         }
     })
+
+    // console.log("getTEDReviewsByAuthor() records", records)
+    // console.log("getTEDReviewsByAuthor() parsedRecords", parsedRecords)
 
     return { records, teds: parsedRecords as TrustEstablishmentDocumentReview[] }
 }
@@ -273,7 +297,8 @@ const getTEDReviewsByRecipient = async (web5: Web5, recipient: string, sorting?:
                 dataFormat: "application/json",
                 recipient: recipient,
                 protocol: reviewProtocolDefinition.protocol,
-                protocolPath: "review",
+                protocolPath: "interaction/review",
+                schema: reviewProtocolDefinition.types.review.schema
             },
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             dateSort: (sorting || "createdDescending") as any
@@ -289,8 +314,9 @@ const getTEDReviewsByInteractionId = async (web5: Web5, interactionId: string): 
             filter: {
                 dataFormat: "application/json",
                 protocol: reviewProtocolDefinition.protocol,
-                protocolPath: "review",
-                parentId: interactionId
+                protocolPath: "interaction/review",
+                parentId: interactionId,
+                schema: reviewProtocolDefinition.types.review.schema
             }
         }
     })
@@ -364,14 +390,18 @@ export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: s
 
   let review: DidReview | undefined
   topics.forEach(topic => {
+    // console.log("inside topic", topic)
     const topicEntries = ted.entries[topic]
     const topicEntriesKeys = Object.keys(topicEntries)
     topicEntriesKeys.forEach(topicEntryKey => {
-      if (topicEntryKey === userDid) {
-        review = topicEntries[topicEntryKey] as DidReview
-      }
+        // console.log("inside topicEntryKey", topicEntryKey)
+        // console.log(topicEntryKey === userDid, topicEntryKey, userDid)
+        if (topicEntryKey === userDid) {
+            review = topicEntries[topicEntryKey] as DidReview
+        }
     })
   })
+//   console.log("review", review)
   
   return review
 }
@@ -382,20 +412,21 @@ const getInteractionObjFromRecord = async (record: Record, proof: string, web5?:
     if (web5) {
         // get reviews from this record id and extract the review
         const reviews = await getTEDReviewsByInteractionId(web5, record.id)
+        console.log("all interaction reviews", reviews)
         // extract all reviews from TED to see if there is at least one with record.author as author and one with record.recipient as author
         const authorTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.author))
         const recipientTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.recipient))
         authorReview = authorTEDReview ? extractReviewFromTED(authorTEDReview, record.author) : undefined
         recipientReview = recipientTEDReview ? extractReviewFromTED(recipientTEDReview, record.recipient) : undefined
     }
-    console.log("authorReview", authorReview)
-    console.log("recipientReview", recipientReview)
+    // console.log("authorReview", authorReview)
+    // console.log("recipientReview", recipientReview)
     return {
         interaction: {
             author: record.author,
             recipient: record.recipient,
             createdDate: record.dateCreated,
-            recordId: record.protocol,
+            recordId: record.id,
             contextId: record.contextId,
             proof: proof,
             filled: (authorReview !== undefined && recipientReview !== undefined) ? true : false

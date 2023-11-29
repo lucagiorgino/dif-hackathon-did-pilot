@@ -5,7 +5,7 @@ export const reviewProtocolDefinition = {
     "interaction": {
       "schema": "https://dif-hackathon-frontend.vercel.app//schemas/interaction",
       "dataFormats": [
-        "application/json"
+        "text/plain"
       ]
     },
     "review": {

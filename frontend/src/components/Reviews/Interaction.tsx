@@ -18,7 +18,11 @@ export function Interaction(props: {
     const [publishingLoading, setPublishingLoading] = useState(false);
     const [modalShow, setModalShow] = useState(false);
     const [stars, setStars] = useState(3);
-    const [subjectDid, setSubjectDid] = useState("");
+    const [subjectDid, setSubjectDid] = useState(
+      props.interaction.author == userDid ? 
+        props.interaction.recipient : 
+        props.interaction.author
+    );
     const [description, setDescription] = useState("");
 
     const handlePublish = async (event: React.FormEvent) => {
@@ -40,7 +44,7 @@ export function Interaction(props: {
               props.interaction.recordId,
               props.interaction.contextId
             );
-            console.log("ee:", record);
+            console.log("new review:", await record?.data.json());
             // send data to the DWN instantly
             if (record) await dwnConnectorAPI.sendRecord(record, userDid);
           } catch (err) {
@@ -55,7 +59,7 @@ export function Interaction(props: {
     return <>  
       <Toast className="mx-1">
           <Toast.Header closeButton={false}>
-            <strong className="me-auto">{props.interaction.recipient ? props.interaction.recipient : props.interaction.author}</strong>
+            <strong className="me-auto">Pending</strong>
             <small>{props.interaction.createdDate}</small> 
             <OverlayTrigger
               placement="right"
@@ -76,7 +80,17 @@ export function Interaction(props: {
             <Modal.Body>
                 <Form.Group className="mb-3" controlId="formDid">
                     <Form.Label><strong>DID subject</strong></Form.Label>
-                    <Form.Control type="text" placeholder="Insert a DID" onChange={(e) => setSubjectDid(e.target.value)} required/>
+                    <Form.Control 
+                    type="text"
+                    placeholder="Insert a DID"
+                    onChange={(e) => setSubjectDid(e.target.value)}
+                    value={
+                      props.interaction.author == userDid ? 
+                        props.interaction.recipient : 
+                        props.interaction.author
+                    }
+                    required
+                    />
                     <Form.Text className="text-muted">
                         Did of the subject of the review.
                     </Form.Text>

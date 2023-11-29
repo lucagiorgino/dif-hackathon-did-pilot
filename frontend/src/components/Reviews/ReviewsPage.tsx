@@ -38,12 +38,22 @@ export function ReviewsPage () {
 
     useEffect(() => {
 
+        const getPendingInteractionsFromDWN = async () => {
+            if (web5 && userDid) {
+                setLoading(true);
+                const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
+                console.log("Interactions: ", interactions);
+
+                setInteractions(interactions);
+                setLoading(false);
+            } 
+        }
+
         const getReviewsFromDWN = async () => {
             if (web5 && userDid) {
                 setLoading(true);
                 const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByAuthor(web5, userDid);
                 
-                console.log("Results: ", tedReviews);
                 const reviews: ReviewTuple[] = [];
                 for(const tedReview of tedReviews) {
                     const r = didPilotTEDReviewAPI.extractReviewFromTED(tedReview, userDid);
@@ -55,17 +65,6 @@ export function ReviewsPage () {
                 }
                 
                 setReviews(reviews);
-                setLoading(false);
-            } 
-        }
-
-        const getPendingInteractionsFromDWN = async () => {
-            if (web5 && userDid) {
-                setLoading(true);
-                const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
-                console.log("Interactions: ", interactions);
-
-                setInteractions(interactions);
                 setLoading(false);
             } 
         }
