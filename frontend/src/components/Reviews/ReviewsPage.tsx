@@ -49,7 +49,7 @@ export function ReviewsPage () {
             if (web5 && userDid) {
                 setLoading(true);
                 const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
-                console.log("Interactions: ", interactions);
+                // console.log("Interactions: ", interactions);
 
                 setInteractions(interactions);
                 setLoading(false);

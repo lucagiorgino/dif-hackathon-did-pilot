@@ -110,11 +110,10 @@ const deleteInteraction = async (
 }
 
 const getInteractionsByAuthor = async (
-    web5: Web5,
-    author: string
+    web5: Web5
 ): Promise<InteractionsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
-        from: author,
+        // from: author,
         message: {
             filter: {
                 dataFormat: "text/plain",
@@ -173,11 +172,12 @@ const getPendingInteractions = async (
 ): Promise<DidInteraction[]> => {
     let allInteractions: InteractionObj[] = []
     const { interactions: recipientInteractions } = await getInteractionsByRecipient(web5, userDid)
-    const { interactions: authorInteractions } = await getInteractionsByAuthor(web5, userDid)
-    // console.log("recipientInteractions", recipientInteractions)
-    // console.log("authorInteractions", authorInteractions)
+    const { interactions: authorInteractions } = await getInteractionsByAuthor(web5)
+    console.log("recipientInteractions", recipientInteractions)
+    console.log("authorInteractions", authorInteractions)
     allInteractions = allInteractions.concat(recipientInteractions || [])
     allInteractions = allInteractions.concat(authorInteractions || [])
+    console.log("allInteractions", allInteractions)
 
     // select only the interactions that are not filled
     // or there are no reviews from the selected user
@@ -188,7 +188,7 @@ const getPendingInteractions = async (
                 interaction.interaction.author == userDid &&
                 interaction.authorReview == undefined
             ) 
-            &&
+            ||
             (
                 interaction.interaction.recipient == userDid &&
                 interaction.recipientReview == undefined
@@ -196,6 +196,7 @@ const getPendingInteractions = async (
         )
     ).map(interaction => interaction.interaction)
 
+    console.log("filtered interactions", interactions)
     return interactions
 }
 
@@ -412,7 +413,7 @@ const getInteractionObjFromRecord = async (record: Record, proof: string, web5?:
     if (web5) {
         // get reviews from this record id and extract the review
         const reviews = await getTEDReviewsByInteractionId(web5, record.id)
-        console.log("all interaction reviews", reviews)
+        // console.log("all interaction reviews", reviews)
         // extract all reviews from TED to see if there is at least one with record.author as author and one with record.recipient as author
         const authorTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.author))
         const recipientTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.recipient))
