@@ -4,7 +4,7 @@ import { useError } from "@/hooks/useError";
 import { useWeb5 } from "@/hooks/useWeb5";
 import { DidInteraction } from "@/types/types";
 import { useState } from "react";
-import { Button, Form, Modal, OverlayTrigger, Spinner, Toast, Tooltip } from "react-bootstrap";
+import { Button, Form, Modal, OverlayTrigger, Spinner, Stack, Toast, Tooltip } from "react-bootstrap";
 import RangeSlider from "react-bootstrap-range-slider";
 
 export function Interaction(props: {
@@ -24,6 +24,11 @@ export function Interaction(props: {
         props.interaction.author
     );
     const [description, setDescription] = useState("");
+    const [interactionModalShow, setInteractionModalShow] = useState(false);
+    const [idCopied, setIdCopied] = useState(false);
+    const [authorCopied, setAuthorCopied] = useState(false);
+    const [recipientCopied, setRecipientCopied] = useState(false);
+    
 
     const handlePublish = async (event: React.FormEvent) => {
       event.preventDefault();
@@ -82,7 +87,7 @@ export function Interaction(props: {
               placement="right"
               overlay={<Tooltip id="button-tooltip">Show interaction details</Tooltip>}
             >
-              <Button className="ms-2" size="sm" variant="outline-dark" onClick={() => {console.log("todo: show interaction details")}}>
+              <Button className="ms-2" size="sm" variant="outline-dark" onClick={() => {setInteractionModalShow(true)}}>
                 <i className="bi bi-info-lg"/>
               </Button>
             </OverlayTrigger>
@@ -97,7 +102,55 @@ export function Interaction(props: {
           </Toast.Header>
       </Toast>
 
-      <Modal show={modalShow} onHide={() => {setModalShow(false);}}>
+      <Modal show={interactionModalShow} onHide={() => {setInteractionModalShow(false);}}>
+        <Modal.Header closeButton>
+          <Modal.Title>Interaction</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+
+            <label className="fw-bold">Id: </label>
+            <p>
+            <Stack direction="horizontal" gap={3}>
+              <p className="text-truncate my-auto">{props.interaction.recordId}</p>
+              <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{idCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setIdCopied(false)}>
+                <Button className="my-auto" size="sm" variant="outline-dark" onClick={() => {navigator.clipboard.writeText(props.interaction.recordId); setIdCopied(true);}}>
+                  <i className="bi bi-copy"/>
+                </Button>
+              </OverlayTrigger>
+            </Stack>  
+            </p>
+
+            <label className="fw-bold">Author: </label>
+            <p>
+            <Stack direction="horizontal" gap={3}>
+              <p className="text-truncate my-auto">{userDid == props.interaction.author ? <strong className="text-warning">(you) </strong> : ""}{props.interaction.author}</p>
+              <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{authorCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setAuthorCopied(false)}>
+                  <Button className="my-auto" size="sm" variant="outline-dark" onClick={() => {navigator.clipboard.writeText(props.interaction.author); setAuthorCopied(true);}}>
+                    <i className="bi bi-copy"/>
+                  </Button>
+                </OverlayTrigger>
+            </Stack> 
+            </p>
+
+            <label className="fw-bold">Recipient: </label>
+            <p>
+            <Stack direction="horizontal" gap={3}>
+              <p className="text-truncate my-auto">{userDid == props.interaction.recipient ? <strong className="text-warning">(you) </strong> : ""}{props.interaction.recipient}</p>
+              <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{recipientCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setRecipientCopied(false)}>
+                  <Button className="my-auto" size="sm" variant="outline-dark" onClick={() => {navigator.clipboard.writeText(props.interaction.recipient); setRecipientCopied(true);}}>
+                    <i className="bi bi-copy"/>
+                  </Button>
+                </OverlayTrigger>
+            </Stack>
+            </p>
+
+            <label className="fw-bold">Created Date: </label><p className="text-truncate">{props.interaction.createdDate}</p>
+            <label className="fw-bold">Proof: </label><p className="text-truncate">{props.interaction.proof}</p>
+        </Modal.Body>
+        
+      </Modal>
+
+      <Modal key="publishReviewModal" show={modalShow} onHide={() => {setModalShow(false);}}>
         <Form onSubmit={handlePublish}>
             <Modal.Header closeButton>
                 <Modal.Title>Add a review</Modal.Title>

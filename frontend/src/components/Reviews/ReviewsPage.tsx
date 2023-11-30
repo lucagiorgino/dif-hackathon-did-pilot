@@ -101,16 +101,21 @@ export function ReviewsPage () {
             <Row className="mb-5 p-2 g-2 flex-row flex-nowrap shadow bg-body rounded"
                 style={{overflowX: "auto"}}
             >   {!interactionsLoading ?
-                <>{interactions.length>0 && interactions.map((interaction, index) => (
-                    <Interaction
-                        key={index} 
-                        interaction={interaction}
-                        trigger={trigger}
-                        setTrigger={setTrigger}
-                    />
-                ))}</>
+                    <>{interactions.length>0 ?
+                        interactions.map((interaction, index) => (
+                        <Interaction
+                            key={index} 
+                            interaction={interaction}
+                            trigger={trigger}
+                            setTrigger={setTrigger}
+                        />
+                    )):
+                    <>
+                        <span className="text-center my-auto p-1"> No pending interactions.</span>
+                    </>}
+                    </>
                 :
-                <Row className="justify-content-center">
+                <Row className="justify-content-center my-1">
                     <Spinner animation="border" variant="warning"/>
                 </Row>}
             </Row>
