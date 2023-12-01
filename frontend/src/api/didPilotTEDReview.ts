@@ -78,11 +78,14 @@ const createInteraction = async (
             recipient: recipient,
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'interaction',
-            schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
+            schema: reviewProtocolDefinition.types.interaction.schema
         },
     })
 
-    console.log("record returned", record)
+    if (record) {
+        const { status: sendStatus } = await record.send(recipient);
+        console.log("sendStatus", sendStatus)
+    }
 
     return {
         record,
@@ -120,7 +123,7 @@ const getInteractionsByAuthor = async (
                 dataFormat: "text/plain",
                 protocol: reviewProtocolDefinition.protocol,
                 protocolPath: 'interaction',
-                schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
+                schema: reviewProtocolDefinition.types.interaction.schema
             }
         }
     })
@@ -149,7 +152,7 @@ const getInteractionsByRecipient = async (
                 recipient: recipient,
                 protocol: reviewProtocolDefinition.protocol,
                 protocolPath: 'interaction',
-                schema: "https://dif-hackathon-frontend.vercel.app//schemas/interaction"
+                schema: reviewProtocolDefinition.types.interaction.schema
             }
         }
     })
@@ -215,7 +218,7 @@ const createTEDReview = async (
         author: author,
         version: version,
         entries: {
-            "https://dif-hackathon-frontend.vercel.app//schemas/review": {
+            [reviewProtocolDefinition.types.review.schema]: {
                 [author]: review
             }
         }
@@ -270,24 +273,18 @@ const getTEDReviewById = async (web5: Web5, id: string): Promise<TEDResponse> =>
 }
 
 // query reviews
-const getTEDReviewsByAuthor = async (web5: Web5, author: string): Promise<TEDsResponse> => {
-    console.log(author === "did:ion:EiB6xXBzWlMoHz3BBcJOcWxeYn4ANwtpjIg9FqB2hcQJXQ:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJkd24tc2lnIiwicHVibGljS2V5SndrIjp7ImNydiI6IkVkMjU1MTkiLCJrdHkiOiJPS1AiLCJ4IjoiVTJQUUJiOENtOFd2WHJtd2RUenNEOHVyR3lBX3dvb3BsejVicXBFVHFESSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifSx7ImlkIjoiZHduLWVuYyIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJzZWNwMjU2azEiLCJrdHkiOiJFQyIsIngiOiJxVm10QTllLUIwUzRaLU5OUmNpLWxBQjUyMUNOQWdPX1c4MTFkWGZLbUZjIiwieSI6IlpQbDhDTzl6NjY2Y0l3aFhZRXNPRkFFTExndEdCcG5lV0JfSmJuUlRsdEkifSwicHVycG9zZXMiOlsia2V5QWdyZWVtZW50Il0sInR5cGUiOiJKc29uV2ViS2V5MjAyMCJ9XSwic2VydmljZXMiOlt7ImlkIjoiZHduIiwic2VydmljZUVuZHBvaW50Ijp7ImVuY3J5cHRpb25LZXlzIjpbIiNkd24tZW5jIl0sIm5vZGVzIjpbImh0dHBzOi8vZHduLnRiZGRldi5vcmcvZHduMiIsImh0dHBzOi8vZHduLnRiZGRldi5vcmcvZHduMCJdLCJzaWduaW5nS2V5cyI6WyIjZHduLXNpZyJdfSwidHlwZSI6IkRlY2VudHJhbGl6ZWRXZWJOb2RlIn1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlDdDFWLXhmdzh0M0pMd09MdEgzTngtNUhqVXppX05ZSS13Snl2ZGlRcGxDQSJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpQUJmd3BVUVRNZjhUNTE3Tnh0RmNmbFF6dk5nQUQ3N0p0OFdIXzc1cGFKZkEiLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUJ3b2t6OTM0cTJGYVM4MG9ST01TdkgzLVUyLVpJNW5zZm9TYlRfZ3RhdG1RIn19")
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getTEDReviewsByAuthor = async (web5: Web5): Promise<TEDsResponse> => {
     const { records, parsedRecords } = await dwnConnector.queryRecords(web5, {
-        // from: author,
         message: {
             filter: {
                 dataFormat: "application/json",
                 protocol: reviewProtocolDefinition.protocol,
                 protocolPath: "interaction/review",
                 schema: reviewProtocolDefinition.types.review.schema,
-                // parentId: parentId
             }
         }
     })
-
-    // console.log("getTEDReviewsByAuthor() records", records)
-    // console.log("getTEDReviewsByAuthor() parsedRecords", parsedRecords)
 
     return { records, teds: parsedRecords as TrustEstablishmentDocumentReview[] }
 }
@@ -344,7 +341,6 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
                     protocolPath: "interaction/review",
                     schema: reviewProtocolDefinition.types.review.schema
                 },
-                // TODO: check if this is OKAY for us
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 dateSort: "createdDescending" as any
             }
@@ -423,15 +419,12 @@ const getInteractionObjFromRecord = async (record: Record, proof: string, web5?:
     if (web5) {
         // get reviews from this record id and extract the review
         const reviews = await getTEDReviewsByInteractionId(web5, record.id)
-        // console.log("all interaction reviews", reviews)
         // extract all reviews from TED to see if there is at least one with record.author as author and one with record.recipient as author
         const authorTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.author))
         const recipientTEDReview = reviews.teds.find(ted => extractReviewFromTED(ted, record.recipient))
         authorReview = authorTEDReview ? extractReviewFromTED(authorTEDReview, record.author) : undefined
         recipientReview = recipientTEDReview ? extractReviewFromTED(recipientTEDReview, record.recipient) : undefined
     }
-    // console.log("authorReview", authorReview)
-    // console.log("recipientReview", recipientReview)
     const options: Intl.DateTimeFormatOptions = { dateStyle: 'medium' };
 
     return {
