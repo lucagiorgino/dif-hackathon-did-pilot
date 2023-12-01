@@ -41,7 +41,7 @@ export function Interaction(props: {
               userDid, 
               "0.0.1", 
               {
-                subjectDid: userDid,
+                subjectDid: subjectDid,
                 stars: stars,
                 description: description  
               },
@@ -51,7 +51,7 @@ export function Interaction(props: {
             );
             console.log("new review:", await record?.data.json());
             // send data to the DWN instantly
-            if (record) await dwnConnectorAPI.sendRecord(record, userDid);
+            if (record) await dwnConnectorAPI.sendRecord(record, subjectDid);
           } catch (err) {
             if (err instanceof Error) setError(err);
           }
@@ -109,7 +109,7 @@ export function Interaction(props: {
         <Modal.Body>
 
             <label className="fw-bold">Id: </label>
-            <p>
+            <div>
             <Stack direction="horizontal" gap={3}>
               <p className="text-truncate my-auto">{props.interaction.recordId}</p>
               <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{idCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setIdCopied(false)}>
@@ -118,10 +118,10 @@ export function Interaction(props: {
                 </Button>
               </OverlayTrigger>
             </Stack>  
-            </p>
+            </div><br/>
 
             <label className="fw-bold">Author: </label>
-            <p>
+            <div>
             <Stack direction="horizontal" gap={3}>
               <p className="text-truncate my-auto">{userDid == props.interaction.author ? <strong className="text-warning">(you) </strong> : ""}{props.interaction.author}</p>
               <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{authorCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setAuthorCopied(false)}>
@@ -130,10 +130,10 @@ export function Interaction(props: {
                   </Button>
                 </OverlayTrigger>
             </Stack> 
-            </p>
+            </div><br/>
 
             <label className="fw-bold">Recipient: </label>
-            <p>
+            <div>
             <Stack direction="horizontal" gap={3}>
               <p className="text-truncate my-auto">{userDid == props.interaction.recipient ? <strong className="text-warning">(you) </strong> : ""}{props.interaction.recipient}</p>
               <OverlayTrigger placement="bottom" delay={{ show: 250, hide: 400 }} overlay={<Tooltip id="button-tooltip">{recipientCopied ? "Copied!" : "Copy"}</Tooltip>} onExited={()=>setRecipientCopied(false)}>
@@ -142,7 +142,7 @@ export function Interaction(props: {
                   </Button>
                 </OverlayTrigger>
             </Stack>
-            </p>
+            </div><br/>
 
             <label className="fw-bold">Created Date: </label><p className="text-truncate">{props.interaction.createdDate}</p>
             <label className="fw-bold">Proof: </label><p className="text-truncate">{props.interaction.proof}</p>
@@ -163,7 +163,7 @@ export function Interaction(props: {
                     placeholder="Insert a DID"
                     onChange={(e) => setSubjectDid(e.target.value)}
                     value={
-                      props.interaction.author == userDid ? 
+                      props.interaction.author === userDid ? 
                         props.interaction.recipient : 
                         props.interaction.author
                     }
