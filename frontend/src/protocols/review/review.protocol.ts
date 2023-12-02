@@ -1,15 +1,15 @@
 export const reviewProtocolDefinition = {
-  "protocol": "https://dif-hackathon-frontend.vercel.app/did-pilot-protocol.json",
+  "protocol": "https://dif-hackathon-did-pilot.vercel.app/did-pilot-protocol.json",
   "published": true,
   "types": {
     "interaction": {
-      "schema": "https://dif-hackathon-frontend.vercel.app/schemas/interaction",
+      "schema": "https://dif-hackathon-did-pilot.vercel.app/schemas/interaction",
       "dataFormats": [
         "text/plain"
       ]
     },
     "review": {
-      "schema": "https://dif-hackathon-frontend.vercel.app/schemas/review",
+      "schema": "https://dif-hackathon-did-pilot.vercel.app/schemas/review",
       "dataFormats": [
         "application/json"
       ]

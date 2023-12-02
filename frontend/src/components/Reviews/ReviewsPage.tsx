@@ -5,7 +5,7 @@ import { DidInteraction, ReviewTuple } from "@/types/types";
 import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert, Badge } from "react-bootstrap";
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
 import { useError } from "@/hooks/useError";
-import dwnConnectorAPI from "@/api/dwnConnector";
+// import dwnConnectorAPI from "@/api/dwnConnector";
 
 export function ReviewsPage () {
     

@@ -20,9 +20,7 @@ export function Web5ContextProvider({ children }: PropsWithChildren) {
         const initWeb5 = async () => {
             try {
                 setWeb5Loading(true);
-                const { web5, did } = await Web5.connect({
-                    sync: '5s'
-                });
+                const { web5, did } = await Web5.connect();
                 console.log("Web5 initialized successfully");
                 setWeb5(web5);
                 setMyDid(did);

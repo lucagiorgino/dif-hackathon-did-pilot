@@ -18,7 +18,7 @@ export function Profile () {
         if (web5 && userDid) {
             setLoading(true);
             const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByRecipient(web5, userDid);
-            const stats = await didPilotTEDReviewAPI.getDidStats(web5, userDid);
+            const stats = await didPilotTEDReviewAPI.getDidStats(web5, userDid); // TODO: remove this and pass the reviews list and compute the stats
 
             console.log("Results: ", tedReviews);
             const reviews: ReviewTuple[] = [];

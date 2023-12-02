@@ -415,7 +415,7 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
 }
 
 
-export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: string): DidReview | undefined => {
+export const extractReviewFromTED = (ted: TrustEstablishmentDocument, _userDid: string): DidReview | undefined => {
   if (!ted.entries) {
     return undefined;
   }
