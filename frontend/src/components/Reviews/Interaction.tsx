@@ -1,5 +1,5 @@
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
-import dwnConnectorAPI from "@/api/dwnConnector";
+// import dwnConnectorAPI from "@/api/dwnConnector";
 import { useError } from "@/hooks/useError";
 import { useWeb5 } from "@/hooks/useWeb5";
 import { DidInteraction } from "@/types/types";
