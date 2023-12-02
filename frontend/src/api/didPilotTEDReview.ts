@@ -82,10 +82,10 @@ const createInteraction = async (
         },
     })
 
-    if (record) {
-        const { status: sendStatus } = await record.send(recipient);
-        console.log("sendStatus", sendStatus)
-    }
+    // if (record) {
+    //     const { status: sendStatus } = await record.send(recipient);
+    //     console.log("sendStatus", sendStatus)
+    // }
 
     return {
         record,

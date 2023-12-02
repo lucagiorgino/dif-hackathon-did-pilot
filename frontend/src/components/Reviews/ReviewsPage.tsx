@@ -62,7 +62,7 @@ export function ReviewsPage () {
         const getReviewsFromDWN = async () => {
             if (web5 && userDid) {
                 setLoading(true);
-                const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByAuthor(web5, userDid);
+                const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByAuthor(web5);
                 
                 const reviews: ReviewTuple[] = [];
                 for(const tedReview of tedReviews) {
