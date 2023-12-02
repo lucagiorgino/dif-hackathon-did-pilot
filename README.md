@@ -11,7 +11,7 @@ This is a submission for the Decentralized Identity Foundation hackathon 2023.
   - **Challenge**: Build a decentralized web app using Web5.js. We are particularly interested in your use of DWNs.
 - Requirements:
   - Deployed app: https://dif-hackathon-did-pilot.vercel.app/
-  - Video presentation: (TO-DO)
+  - Video presentation: https://youtu.be/b5gr-YV2Bkg
 
 # What problems does DIDPilot aim to solve?
 
