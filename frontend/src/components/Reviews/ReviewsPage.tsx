@@ -5,7 +5,7 @@ import { DidInteraction, ReviewTuple } from "@/types/types";
 import { Container, Tooltip, OverlayTrigger, Row, Spinner, Button, Modal, Form, Alert, Badge } from "react-bootstrap";
 import didPilotTEDReviewAPI from "@/api/didPilotTEDReview";
 import { useError } from "@/hooks/useError";
-import dwnConnectorAPI from "@/api/dwnConnector";
+// import dwnConnectorAPI from "@/api/dwnConnector";
 
 export function ReviewsPage () {
     
@@ -32,10 +32,10 @@ export function ReviewsPage () {
             setPublishingLoading(true);
 
             try {
-                const {record, interaction} = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
-                console.log("Interaction: ", interaction);
+                const record = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
+                // console.log("Interaction: ", interaction);
                 console.log("Record", record);
-                if (record) await dwnConnectorAPI.sendRecord(record, recipientDid);
+                // if (record) await dwnConnectorAPI.sendRecord(record, recipientDid);
             } catch (err) {
                 if (err instanceof Error) setError(err);
             }
@@ -52,7 +52,8 @@ export function ReviewsPage () {
             if (web5 && userDid) {
                 setInteractionsLoading(true);
                 const interactions = await didPilotTEDReviewAPI.getPendingInteractions(web5, userDid);
-                // console.log("Interactions: ", interactions);
+                const getAll = await didPilotTEDReviewAPI.getInteractions(web5);
+                console.log("All record Interactions: ", getAll);
 
                 setInteractions(interactions);
                 setInteractionsLoading(false);

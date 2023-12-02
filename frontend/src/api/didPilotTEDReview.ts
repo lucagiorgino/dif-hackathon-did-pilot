@@ -22,10 +22,10 @@ type TEDsResponse = {
     teds: TrustEstablishmentDocumentReview[]
 }
 
-type InteractionResponse = {
-    record: Record | undefined,
-    interaction: DidInteraction | undefined
-}
+// type InteractionResponse = {
+//     record: Record | undefined,
+//     interaction: DidInteraction | undefined
+// }
 
 type InteractionsResponse = {
     records: Record[] | undefined,
@@ -69,30 +69,48 @@ const createInteraction = async (
     web5: Web5,
     recipient: string,
     proof: string,
-): Promise<InteractionResponse> => {
-    console.log("reviewProtocolDefinition", reviewProtocolDefinition.protocol)
-    const record = await dwnConnector.writeRecord(web5, {
+): Promise<Record> => {
+    
+    const { record } = await web5.dwn.records.create({
         data: proof,
         message: {
-            dataFormat: 'text/plain',
-            recipient: recipient,
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'interaction',
-            schema: reviewProtocolDefinition.types.interaction.schema
+            schema: reviewProtocolDefinition.types.interaction.schema,
+            dataFormat: reviewProtocolDefinition.types.interaction.dataFormats[0],
+            recipient: recipient,
         },
     })
-
-    // if (record) {
-    //     const { status: sendStatus } = await record.send(recipient);
-    //     console.log("sendStatus", sendStatus)
-    // }
-
-    return {
-        record,
-        interaction: record ? 
-            (await getInteractionObjFromRecord(record, proof)).interaction : 
-            undefined
+    console.log("record", record)
+    if (!record) {
+        throw new Error('Unable to create record');
     }
+    const { status: sendStatus } = await record.send(recipient);
+
+    if (sendStatus.code !== 202) {
+        console.log("Unable to send to target did:" + sendStatus);
+    }
+    else {
+        console.log("Shared list sent to recipient");
+    }
+
+    return record
+}
+
+const getInteractions = async (
+    web5: Web5,
+): Promise<Record[] | undefined> => {
+    const { records } = await web5.dwn.records.query({
+        message: {
+            filter: {
+                schema: reviewProtocolDefinition.types.interaction.schema
+            }
+        }
+    })
+
+    console.log("retrieved records", records)
+
+    return records
 }
 
 const deleteInteraction = async (
@@ -442,5 +460,5 @@ const getInteractionObjFromRecord = async (record: Record, proof: string, web5?:
     }
 }
 
-const didPilotTEDReviewAPI = { createInteraction, deleteInteraction, getInteractionsByAuthor, getInteractionsByRecipient, getPendingInteractions, getInteractionObjFromRecord, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
+const didPilotTEDReviewAPI = { getInteractions, createInteraction, deleteInteraction, getInteractionsByAuthor, getInteractionsByRecipient, getPendingInteractions, getInteractionObjFromRecord, getTEDReviewById, getDidStats, createTEDReview, deleteTEDReviewById, getTEDReviewsByAuthor, getTEDReviewsByRecipient, extractReviewFromTED};
 export default didPilotTEDReviewAPI;
