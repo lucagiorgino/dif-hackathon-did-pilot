@@ -35,7 +35,7 @@ export function ReviewsPage () {
                 const {record, interaction} = await didPilotTEDReviewAPI.createInteraction(web5, recipientDid, proof);
                 console.log("Interaction: ", interaction);
                 console.log("Record", record);
-                if (record) await dwnConnectorAPI.sendRecord(record, recipientDid);
+                // if (record) await dwnConnectorAPI.sendRecord(record, recipientDid);
             } catch (err) {
                 if (err instanceof Error) setError(err);
             }

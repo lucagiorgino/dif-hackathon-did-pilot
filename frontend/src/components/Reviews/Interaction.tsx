@@ -51,7 +51,7 @@ export function Interaction(props: {
             );
             console.log("new review:", await record?.data.json());
             // send data to the DWN instantly
-            if (record) await dwnConnectorAPI.sendRecord(record, subjectDid);
+            // if (record) await dwnConnectorAPI.sendRecord(record, subjectDid);
           } catch (err) {
             if (err instanceof Error) setError(err);
           }

@@ -67,30 +67,41 @@ export type TrustEstablishmentDocumentReview = {
 
 const createInteraction = async (
     web5: Web5,
-    recipient: string,
+    recipientDid: string,
     proof: string,
 ): Promise<InteractionResponse> => {
-    console.log("reviewProtocolDefinition", reviewProtocolDefinition.protocol)
-    const record = await dwnConnector.writeRecord(web5, {
+    console.log("Creating interaction...", reviewProtocolDefinition.protocol)
+    const { record: interactionRecord, status: createStatus } = await web5.dwn.records.create({
         data: proof,
         message: {
             dataFormat: 'text/plain',
-            recipient: recipient,
+            recipient: recipientDid,
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'interaction',
             schema: reviewProtocolDefinition.types.interaction.schema
         },
     })
 
-    // if (record) {
-    //     const { status: sendStatus } = await record.send(recipient);
-    //     console.log("sendStatus", sendStatus)
-    // }
+    if (createStatus.code >= 300) {
+        console.log("Unable to create interaction");
+        throw new Error(createStatus.detail);
+    }
 
+    if (interactionRecord) {
+        const { status: sendStatus } = await interactionRecord.send(recipientDid);
+
+        if (sendStatus.code !== 202) {
+            console.log("Unable to send to target did:" + recipientDid);
+            throw new Error(sendStatus.detail);;
+        }
+        console.log("Interaction sent to recipient");
+    }
+
+    
     return {
-        record,
-        interaction: record ? 
-            (await getInteractionObjFromRecord(record, proof)).interaction : 
+        record: interactionRecord,
+        interaction: interactionRecord ? 
+            (await getInteractionObjFromRecord(interactionRecord, proof)).interaction : 
             undefined
     }
 }
@@ -209,7 +220,7 @@ const createTEDReview = async (
     author: string, 
     version: string, 
     review: DidReview,
-    recipient: string,
+    recipientDid: string,
     parentRecordId?: string,
     contextId?: string,
 ) => {
@@ -224,11 +235,11 @@ const createTEDReview = async (
         }
       })
       trustEstablishmentDocumentAPI.validateTrustEstablishmentDocument(tedReview, ReviewSchema)
-      const record = await dwnConnector.writeRecord(web5, {
+      const { record: tedRecord, status: createStatus } = await web5.dwn.records.create({
           data: tedReview,
           message: {
             dataFormat: 'application/json',
-            recipient: recipient,
+            recipient: recipientDid,
             protocol: reviewProtocolDefinition.protocol,
             protocolPath: 'interaction/review',
             parentId: parentRecordId,
@@ -236,8 +247,23 @@ const createTEDReview = async (
             schema: reviewProtocolDefinition.types.review.schema
           },
       })
-  
-      return record
+      
+    if (createStatus.code >= 300) {
+        console.log("Unable to create interacation");
+        throw new Error(createStatus.detail);
+    }
+
+    if (tedRecord) {
+        const { status: sendStatus } = await tedRecord.send(recipientDid);
+
+        if (sendStatus.code !== 202) {
+            console.log("Unable to send to target did:" + recipientDid);
+            throw new Error(sendStatus.detail);;
+        }
+        console.log("Interaction sent to recipient");
+    }
+
+      return tedRecord
   }
 
 // delete review
@@ -388,27 +414,30 @@ const getDidStats = async (web5: Web5, did: string): Promise<DidStats> => {
     }
 }
 
+
 export const extractReviewFromTED = (ted: TrustEstablishmentDocument, userDid: string): DidReview | undefined => {
   if (!ted.entries) {
-    return undefined
+    return undefined;
   }
   // each review is inside a topic
-  const topics = Object.keys(ted.entries)
+  const topics = Object.keys(ted.entries);
+  let review: DidReview | undefined;
 
-  let review: DidReview | undefined
-  topics.forEach(topic => {
-    // console.log("inside topic", topic)
-    const topicEntries = ted.entries[topic]
-    const topicEntriesKeys = Object.keys(topicEntries)
-    topicEntriesKeys.forEach(topicEntryKey => {
-        // console.log("inside topicEntryKey", topicEntryKey)
-        // console.log(topicEntryKey === userDid, topicEntryKey, userDid)
-        if (topicEntryKey === userDid) {
-            review = topicEntries[topicEntryKey] as DidReview
-        }
+    topics.forEach(topic => {
+        const topicEntries = ted.entries[topic];
+        // console.log("entries:" , topicEntries);
+        const topicEntriesKeys = Object.keys(topicEntries)
+        // console.log("topicEntriesKeys:" , topicEntriesKeys);
+
+        topicEntriesKeys.forEach(topicEntryKey => {
+            // console.log("inside topicEntryKey", topicEntryKey)
+            // console.log(topicEntryKey === userDid, topicEntryKey, userDid)
+            // if (topicEntryKey === userDid) { // TODO: userDid variable is not the user did, here fails if you are doing a search
+                review = topicEntries[topicEntryKey] as DidReview
+            // }
+        })
     })
-  })
-//   console.log("review", review)
+    console.log("Extracted review:", review)
   
   return review
 }

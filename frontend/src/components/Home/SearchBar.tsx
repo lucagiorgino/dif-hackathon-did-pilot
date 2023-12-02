@@ -26,7 +26,7 @@ function SearchBar() {
       setLoading(true);
 
       const { teds: tedReviews } = await didPilotTEDReviewAPI.getTEDReviewsByRecipient(web5, queryDid);
-      const stats = await didPilotTEDReviewAPI.getDidStats(web5, queryDid);
+      const stats = await didPilotTEDReviewAPI.getDidStats(web5, queryDid); // TODO: remove this and pass the reviews list and compute the stats
 
       console.log("Results: ", tedReviews);
       console.log("Stats: ", stats);

@@ -19,7 +19,7 @@ export function Landing () {
             <Link className="text-body-secondary text-decoration-none" target="_blank" to={`https://github.com/mmatteo23`}> Matteo Midena</Link>
         </p>
         <h4>    
-            <Link className="text-decoration-none" target="_blank" to={`https://github.com/lucagiorgino/dif-hackathon-frontend`}>
+            <Link className="text-decoration-none" target="_blank" to={`https://github.com/lucagiorgino/dif-hackathon-did-pilot`}>
                 <i className="bi bi-github me-2"/>GitHub repository
             </Link> 
         </h4>

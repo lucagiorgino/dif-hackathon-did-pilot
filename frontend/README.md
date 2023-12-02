@@ -9,8 +9,8 @@ This is a submission for the Decentralized Identity Foundation hackathon 2023.
 ## Selected sponsor track
 - [TBD (Block)](https://www.tbd.website/)
   - **Challenge**: Build a decentralized web app using Web5.js. We are particularly interested in your use of DWNs.
-- Requiremets:
-  - Deployed app: https://dif-hackathon-frontend.vercel.app/
+- Requirements:
+  - Deployed app: https://dif-hackathon-did-pilot.vercel.app/
   - Video presentation: (TO-DO)
 
 # What problems does DIDPilot aim to solve?
@@ -29,7 +29,7 @@ We think that in an even more decentralized world, the use of **pseudonyms** can
 Let's go into some detail.
 
 DIDPilot works by asking its users to review each entity who they have an interaction with.
-Every interaction and review is saved on the recipient DWN, so when you want to get that DID reviews, DIDPilot simply asks DID's nodes to send them back.
+Every interaction and review is saved on the recipient DWN, so when you want to get the DID reviews, DIDPilot simply asks DID nodes to send them back.
 
 *"Maybe here could be perfect a little diagram"*
 
@@ -49,15 +49,15 @@ We have defined a protocol to set some permissions about who can write reviews. 
 - **interaction**: which reports the data of a connection between two DIDs
 - **review**: this is the real review a DID can do about another one.
 
-Review is set as a sub path of an interaction and only the author and the recipient of the last one can write a review.
+Review is set as a sub-path of an interaction and only the author and the recipient of the last one can write a review.
 
 
 ### Protocols, Not Standards
-By thinking about what a review could be and make it more interoperable and accessible through DWNs, we believe that the **DIF Trust Establishment spec** could play a significant role to have a standard way to do attestations.
+By thinking about what a review could be and making it more interoperable and accessible through DWNs, we believe that the **DIF Trust Establishment spec** could play a significant role in having a standard way to do attestations.
 
 ## Future steps
 During the development of this project, we thought about its criticisms and there could be some problems:
-- design a system to de/incentivize users to write fake/true reviews to the network (example of possible solutions: define an achievement program, add some fees to add a review and making less affordable fake ones, etc...)
+- design a system to de/incentivize users to write fake/true reviews to the network (example of possible solutions: define an achievement program, add some fees to add a review and make less affordable fake ones, etc...)
 - ...
 
 
